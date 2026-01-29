@@ -194,11 +194,11 @@ app.post('/api/templates', (req, res) => {
 app.get('/api/smtp-settings', (req, res) => { res.json(smtpSettings); });
 app.post('/api/smtp-settings', (req, res) => {
   try {
-    const { host, port, encryption, user, pass, senderName, fromEmail, companyName, companyPhone } = req.body;
+    const { host, port, secure, user, pass, senderName, fromEmail, companyName, companyPhone } = req.body;
     smtpSettings = {
       host: host || '',
       port: parseInt(port) || 587,
-      encryption: encryption || 'true',
+      secure: secure === 'true' || secure === true,
       user: user || '',
       pass: pass || '',
       senderName: senderName || '',
@@ -216,27 +216,15 @@ app.post('/api/smtp-test', async (req, res) => {
     if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) {
       return res.json({ success: false, error: 'Settings incomplete' });
     }
-
     const config = {
       host: smtpSettings.host,
       port: smtpSettings.port,
+      secure: smtpSettings.secure,
       auth: { user: smtpSettings.user, pass: smtpSettings.pass },
       tls: { rejectUnauthorized: false }
     };
-
-    // Handle different encryption types
-    if (smtpSettings.port === 465 || smtpSettings.encryption === 'true') {
-      config.secure = true;  // SSL/TLS
-    } else if (smtpSettings.encryption === 'starttls') {
-      config.secure = false; // STARTTLS
-    } else if (smtpSettings.encryption === 'none') {
-      config.secure = false;
-      config.tls = false;
-    }
-
     const transporter = nodemailer.createTransport(config);
     const verified = await transporter.verify();
-    
     if (verified) {
       res.json({ success: true, message: 'Connected successfully!' });
     } else {
@@ -253,27 +241,14 @@ app.post('/api/smtp-test-email', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.json({ success: false, error: 'Email required' });
     if (!smtpSettings.user || !smtpSettings.pass) return res.json({ success: false, error: 'SMTP not configured' });
-
     const config = {
       host: smtpSettings.host,
       port: smtpSettings.port,
+      secure: smtpSettings.secure,
       auth: { user: smtpSettings.user, pass: smtpSettings.pass },
       tls: { rejectUnauthorized: false }
     };
-
-    // Handle different encryption types
-    if (smtpSettings.port === 465 || smtpSettings.encryption === 'true') {
-      config.secure = true;  // SSL/TLS
-    } else if (smtpSettings.encryption === 'starttls') {
-      config.secure = false; // STARTTLS
-    } else if (smtpSettings.encryption === 'none') {
-      config.secure = false;
-      config.tls = false;
-    }
-
     const transporter = nodemailer.createTransport(config);
-    
-    // Smart From Field
     let fromField = smtpSettings.user;
     if (smtpSettings.senderName && smtpSettings.fromEmail) {
       fromField = `${smtpSettings.senderName} <${smtpSettings.fromEmail}>`;
@@ -282,14 +257,12 @@ app.post('/api/smtp-test-email', async (req, res) => {
     } else if (smtpSettings.fromEmail) {
       fromField = smtpSettings.fromEmail;
     }
-
     await transporter.sendMail({
       from: fromField,
       to: email,
       subject: 'Test Email - Campaign Manager',
       html: `<h1>✓ Success!</h1><p>Email sent from: ${smtpSettings.senderName || 'System'}</p><p>Your SMTP is configured correctly!</p>`
     });
-
     res.json({ success: true, message: 'Test email sent!' });
   } catch (error) {
     res.json({ success: false, error: error.message });
@@ -309,19 +282,10 @@ app.post('/api/campaigns/send', async (req, res) => {
     const config = {
       host: smtpSettings.host,
       port: smtpSettings.port,
+      secure: smtpSettings.secure,
       auth: { user: smtpSettings.user, pass: smtpSettings.pass },
       tls: { rejectUnauthorized: false }
     };
-
-    // Handle different encryption types
-    if (smtpSettings.port === 465 || smtpSettings.encryption === 'true') {
-      config.secure = true;  // SSL/TLS
-    } else if (smtpSettings.encryption === 'starttls') {
-      config.secure = false; // STARTTLS
-    } else if (smtpSettings.encryption === 'none') {
-      config.secure = false;
-      config.tls = false;
-    }
     const transporter = nodemailer.createTransport(config);
     let fromField = smtpSettings.user;
     if (smtpSettings.senderName && smtpSettings.fromEmail) {
