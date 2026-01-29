@@ -168,9 +168,39 @@
 
         <!-- TEMPLATES -->
         <div id="templates" class="tab-content">
-            <div class="card">
-                <h2>📚 Available Templates</h2>
-                <div id="templatesList"></div>
+            <div class="grid">
+                <div class="card">
+                    <h2>📚 Available Templates</h2>
+                    <button class="btn-success" onclick="newTemplate()" style="width:100%;margin-bottom:15px">+ Create New Template</button>
+                    <div id="templatesList"></div>
+                </div>
+
+                <div class="card">
+                    <h2>✏️ Template Editor</h2>
+                    <div id="templateMsg" class="msg"></div>
+                    <div id="templateEditor" style="display:none">
+                        <form id="templateForm" onsubmit="saveTemplate(event)">
+                            <div class="form-group">
+                                <label>Template Name *</label>
+                                <input type="text" id="tname" required placeholder="e.g., Real Estate Premium, Church Revival, etc">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Subject Line *</label>
+                                <input type="text" id="tsubject" required placeholder="e.g., Join Us for {{prayerSection}}">
+                            </div>
+                            <div class="form-group">
+                                <label>Email HTML Content *</label>
+                                <textarea id="tcontent" required placeholder="Paste your HTML email template here..."></textarea>
+                                <p style="font-size:12px;color:#666;margin-top:8px">📌 Use variables like {{firstName}}, {{companyName}}, {{zoomLink}}, {{meetingDate}}, {{meetingTime}}, {{prayerSection}}</p>
+                            </div>
+                            <button type="submit" class="btn-success" style="width:100%;margin-bottom:8px">Save Template</button>
+                            <button type="button" class="btn-small" onclick="cancelTemplate()" style="width:100%;background:#999">Cancel</button>
+                        </form>
+                    </div>
+                    <div id="noTemplate" style="text-align:center;color:#999;padding:30px">
+                        <p>Select or create a template to edit</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -423,8 +453,57 @@
 
         async function loadTemplates() {
             templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
-            const html = templates.map(t => `<div style="padding:15px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;background:#f9f9f9"><strong>${t.name}</strong><p style="font-size:12px;color:#666;margin-top:5px">${t.subject.substring(0,60)}</p></div>`).join('');
+            const html = templates.map(t => `<div style="padding:15px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;background:#f9f9f9;cursor:pointer;transition:all .3s" onclick="editTemplate(${t.id})" onmouseover="this.style.background='#e8f0ff'" onmouseout="this.style.background='#f9f9f9'"><strong>${t.name}</strong><p style="font-size:12px;color:#666;margin-top:5px">${t.subject.substring(0,60)}</p></div>`).join('');
             document.getElementById('templatesList').innerHTML = html;
+        }
+
+        let editId = null;
+
+        function newTemplate() {
+            editId = null;
+            document.getElementById('tname').value = '';
+            document.getElementById('tsubject').value = '';
+            document.getElementById('tcontent').value = '';
+            document.getElementById('templateEditor').style.display = 'block';
+            document.getElementById('noTemplate').style.display = 'none';
+        }
+
+        function editTemplate(id) {
+            const t = templates.find(x => x.id === id);
+            if (t) {
+                editId = id;
+                document.getElementById('tname').value = t.name;
+                document.getElementById('tsubject').value = t.subject;
+                document.getElementById('tcontent').value = t.html;
+                document.getElementById('templateEditor').style.display = 'block';
+                document.getElementById('noTemplate').style.display = 'none';
+            }
+        }
+
+        function cancelTemplate() {
+            document.getElementById('templateEditor').style.display = 'none';
+            document.getElementById('noTemplate').style.display = 'block';
+        }
+
+        async function saveTemplate(e) {
+            e.preventDefault();
+            const r = await fetch(`${API}/templates`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: editId,
+                    name: document.getElementById('tname').value,
+                    subject: document.getElementById('tsubject').value,
+                    html: document.getElementById('tcontent').value
+                })
+            }).then(r => r.json());
+            if (r.success) {
+                showMsg('templateMsg', '✓ Template saved!', 'success');
+                cancelTemplate();
+                loadTemplates();
+            } else {
+                showMsg('templateMsg', '✗ Error saving template', 'error');
+            }
         }
 
         async function sendCampaign(e) {
