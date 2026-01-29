@@ -213,30 +213,22 @@ app.post('/api/smtp-settings', (req, res) => {
 // ==================== SMTP TEST ====================
 app.post('/api/smtp-test', async (req, res) => {
   try {
-    if (!smtpSettings.host) {
-      return res.json({ success: false, error: 'SMTP host required' });
+    if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) {
+      return res.json({ success: false, error: 'Settings incomplete' });
     }
 
     const config = {
       host: smtpSettings.host,
       port: smtpSettings.port,
+      auth: { user: smtpSettings.user, pass: smtpSettings.pass },
       tls: { rejectUnauthorized: false }
     };
-
-    // Only add auth if username/password provided
-    if (smtpSettings.user && smtpSettings.pass) {
-      config.auth = { 
-        user: smtpSettings.user, 
-        pass: smtpSettings.pass 
-      };
-    }
 
     // Handle different encryption types
     if (smtpSettings.port === 465 || smtpSettings.encryption === 'true') {
       config.secure = true;  // SSL/TLS
     } else if (smtpSettings.encryption === 'starttls') {
       config.secure = false; // STARTTLS
-      config.requireTLS = true;
     } else if (smtpSettings.encryption === 'none') {
       config.secure = false;
       config.tls = false;
@@ -260,28 +252,20 @@ app.post('/api/smtp-test-email', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.json({ success: false, error: 'Email required' });
-    if (!smtpSettings.host) return res.json({ success: false, error: 'SMTP host not configured' });
+    if (!smtpSettings.user || !smtpSettings.pass) return res.json({ success: false, error: 'SMTP not configured' });
 
     const config = {
       host: smtpSettings.host,
       port: smtpSettings.port,
+      auth: { user: smtpSettings.user, pass: smtpSettings.pass },
       tls: { rejectUnauthorized: false }
     };
-
-    // Only add auth if username/password provided
-    if (smtpSettings.user && smtpSettings.pass) {
-      config.auth = { 
-        user: smtpSettings.user, 
-        pass: smtpSettings.pass 
-      };
-    }
 
     // Handle different encryption types
     if (smtpSettings.port === 465 || smtpSettings.encryption === 'true') {
       config.secure = true;  // SSL/TLS
     } else if (smtpSettings.encryption === 'starttls') {
       config.secure = false; // STARTTLS
-      config.requireTLS = true;
     } else if (smtpSettings.encryption === 'none') {
       config.secure = false;
       config.tls = false;
@@ -290,11 +274,11 @@ app.post('/api/smtp-test-email', async (req, res) => {
     const transporter = nodemailer.createTransport(config);
     
     // Smart From Field
-    let fromField = smtpSettings.user || 'noreply@localhost';
+    let fromField = smtpSettings.user;
     if (smtpSettings.senderName && smtpSettings.fromEmail) {
       fromField = `${smtpSettings.senderName} <${smtpSettings.fromEmail}>`;
     } else if (smtpSettings.senderName) {
-      fromField = `${smtpSettings.senderName} <${smtpSettings.user || 'noreply@localhost'}>`;
+      fromField = `${smtpSettings.senderName} <${smtpSettings.user}>`;
     } else if (smtpSettings.fromEmail) {
       fromField = smtpSettings.fromEmail;
     }
@@ -325,33 +309,25 @@ app.post('/api/campaigns/send', async (req, res) => {
     const config = {
       host: smtpSettings.host,
       port: smtpSettings.port,
+      auth: { user: smtpSettings.user, pass: smtpSettings.pass },
       tls: { rejectUnauthorized: false }
     };
-
-    // Only add auth if username/password provided
-    if (smtpSettings.user && smtpSettings.pass) {
-      config.auth = { 
-        user: smtpSettings.user, 
-        pass: smtpSettings.pass 
-      };
-    }
 
     // Handle different encryption types
     if (smtpSettings.port === 465 || smtpSettings.encryption === 'true') {
       config.secure = true;  // SSL/TLS
     } else if (smtpSettings.encryption === 'starttls') {
       config.secure = false; // STARTTLS
-      config.requireTLS = true;
     } else if (smtpSettings.encryption === 'none') {
       config.secure = false;
       config.tls = false;
     }
     const transporter = nodemailer.createTransport(config);
-    let fromField = smtpSettings.user || 'noreply@localhost';
+    let fromField = smtpSettings.user;
     if (smtpSettings.senderName && smtpSettings.fromEmail) {
       fromField = `${smtpSettings.senderName} <${smtpSettings.fromEmail}>`;
     } else if (smtpSettings.senderName) {
-      fromField = `${smtpSettings.senderName} <${smtpSettings.user || 'noreply@localhost'}>`;
+      fromField = `${smtpSettings.senderName} <${smtpSettings.user}>`;
     } else if (smtpSettings.fromEmail) {
       fromField = smtpSettings.fromEmail;
     }
