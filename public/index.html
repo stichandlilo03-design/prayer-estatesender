@@ -276,14 +276,39 @@
                     <h2>⚙️ SMTP Configuration</h2>
                     <div id="smtpMsg" class="msg"></div>
                     <form id="smtpForm" onsubmit="saveSmtp(event)">
-                        <div class="form-group"><label>SMTP Host *</label><input type="text" id="shost" required placeholder="smtp.gmail.com"></div>
-                        <div class="form-group"><label>Port *</label><input type="number" id="sport" required value="587"></div>
-                        <div class="form-group"><label>Encryption</label><select id="ssecure"><option value="false">TLS (587)</option><option value="true">SSL (465)</option></select></div>
-                        <div class="form-group"><label>Email/Username *</label><input type="email" id="suser" required></div>
-                        <div class="form-group"><label>Password *</label><input type="password" id="spass" required></div>
-                        <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="Your Name"></div>
-                        <div class="form-group"><label>Company Name</label><input type="text" id="scompany" placeholder="Your Company/Church"></div>
-                        <div class="form-group"><label>Phone</label><input type="text" id="sphone" placeholder="+1-555-1234"></div>
+                        <div class="form-group"><label>SMTP Host *</label><input type="text" id="shost" required placeholder="smtp.gmail.com or mail.yourdomain.com"></div>
+                        
+                        <div class="form-group">
+                            <label>Port *</label>
+                            <select id="sport" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:inherit" onchange="updateEncryptionOptions()">
+                                <option value="25">25 - SMTP (No Encryption / STARTTLS)</option>
+                                <option value="465">465 - SMTPS (SSL/TLS)</option>
+                                <option value="587" selected>587 - SMTP (STARTTLS)</option>
+                                <option value="2525">2525 - Alternative SMTP</option>
+                                <option value="custom">Custom Port</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="customPortGroup" style="display:none">
+                            <label>Custom Port Number</label>
+                            <input type="number" id="customPort" placeholder="Enter port number" min="1" max="65535">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Encryption Type</label>
+                            <select id="ssecure" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:inherit">
+                                <option value="none">None (Port 25)</option>
+                                <option value="starttls">STARTTLS (Ports 25, 587)</option>
+                                <option value="true" selected>SSL/TLS (Port 465, 587)</option>
+                            </select>
+                            <p style="font-size:12px;color:#666;margin-top:5px">💡 Port 25: Choose None or STARTTLS | Port 465: Choose SSL/TLS | Port 587: Choose STARTTLS or SSL/TLS</p>
+                        </div>
+                        
+                        <div class="form-group"><label>Auth Email/Username *</label><input type="email" id="suser" required placeholder="your-email@gmail.com"></div>
+                        <div class="form-group"><label>Password/App Password *</label><input type="password" id="spass" required placeholder="Your SMTP password"></div>
+                        <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="Your Name or Prayer Team"></div>
+                        <div class="form-group"><label>Company Name</label><input type="text" id="scompany" placeholder="Your Church or Organization"></div>
+                        <div class="form-group"><label>Phone</label><input type="text" id="sphone" placeholder="+1-XXX-XXX-XXXX"></div>
                         <button type="submit" class="btn-success" style="width:100%">Save Settings</button>
                     </form>
                 </div>
@@ -333,6 +358,17 @@
             document.querySelectorAll('.tab-inner').forEach(e => e.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
             event.target.classList.add('active');
+        }
+
+        function updateEncryptionOptions() {
+            const port = document.getElementById('sport').value;
+            const customPortGroup = document.getElementById('customPortGroup');
+            
+            if (port === 'custom') {
+                customPortGroup.style.display = 'block';
+            } else {
+                customPortGroup.style.display = 'none';
+            }
         }
 
         function selectTemplate(id) {
@@ -549,7 +585,7 @@
             const s = await fetch(`${API}/smtp-settings`).then(r => r.json()).catch(() => ({}));
             document.getElementById('shost').value = s.host || '';
             document.getElementById('sport').value = s.port || 587;
-            document.getElementById('ssecure').value = s.secure ? 'true' : 'false';
+            document.getElementById('ssecure').value = s.encryption || 'true';
             document.getElementById('suser').value = s.user || '';
             document.getElementById('spass').value = s.pass || '';
             document.getElementById('ssendername').value = s.senderName || '';
@@ -559,13 +595,23 @@
 
         async function saveSmtp(e) {
             e.preventDefault();
+            
+            let port = document.getElementById('sport').value;
+            if (port === 'custom') {
+                port = document.getElementById('customPort').value;
+                if (!port) {
+                    showMsg('smtpMsg', '⚠ Enter custom port number', 'warning');
+                    return;
+                }
+            }
+            
             const r = await fetch(`${API}/smtp-settings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     host: document.getElementById('shost').value,
-                    port: parseInt(document.getElementById('sport').value),
-                    secure: document.getElementById('ssecure').value === 'true',
+                    port: parseInt(port),
+                    encryption: document.getElementById('ssecure').value,
                     user: document.getElementById('suser').value,
                     pass: document.getElementById('spass').value,
                     senderName: document.getElementById('ssendername').value,
