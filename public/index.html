@@ -304,8 +304,8 @@
                             <p style="font-size:12px;color:#666;margin-top:5px">💡 Port 25: Choose None or STARTTLS | Port 465: Choose SSL/TLS | Port 587: Choose STARTTLS or SSL/TLS</p>
                         </div>
                         
-                        <div class="form-group"><label>Auth Email/Username *</label><input type="email" id="suser" required placeholder="your-email@gmail.com"></div>
-                        <div class="form-group"><label>Password/App Password *</label><input type="password" id="spass" required placeholder="Your SMTP password"></div>
+                        <div class="form-group"><label>Auth Email/Username</label><input type="email" id="suser" placeholder="Only needed for ports 465, 587"></div>
+                        <div class="form-group"><label>Password/App Password</label><input type="password" id="spass" placeholder="Leave blank for port 25 if not needed"></div>
                         <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="Your Name or Prayer Team"></div>
                         <div class="form-group"><label>Company Name</label><input type="text" id="scompany" placeholder="Your Church or Organization"></div>
                         <div class="form-group"><label>Phone</label><input type="text" id="sphone" placeholder="+1-XXX-XXX-XXXX"></div>
@@ -596,6 +596,12 @@
         async function saveSmtp(e) {
             e.preventDefault();
             
+            // Check host is always required
+            if (!document.getElementById('shost').value) {
+                showMsg('smtpMsg', '⚠ SMTP Host is required', 'warning');
+                return;
+            }
+            
             let port = document.getElementById('sport').value;
             if (port === 'custom') {
                 port = document.getElementById('customPort').value;
@@ -612,11 +618,11 @@
                     host: document.getElementById('shost').value,
                     port: parseInt(port),
                     encryption: document.getElementById('ssecure').value,
-                    user: document.getElementById('suser').value,
-                    pass: document.getElementById('spass').value,
-                    senderName: document.getElementById('ssendername').value,
-                    companyName: document.getElementById('scompany').value,
-                    companyPhone: document.getElementById('sphone').value
+                    user: document.getElementById('suser').value || '',
+                    pass: document.getElementById('spass').value || '',
+                    senderName: document.getElementById('ssendername').value || '',
+                    companyName: document.getElementById('scompany').value || '',
+                    companyPhone: document.getElementById('sphone').value || ''
                 })
             }).then(r => r.json());
             if (r.success) showMsg('smtpMsg', '✓ Saved!', 'success');
