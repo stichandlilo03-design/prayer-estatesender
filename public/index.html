@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Campaign Manager v6.0 - PROFESSIONAL</title>
+    <title>Dual Sender - Real Estate & Prayer Meetings v1.0</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #667eea; min-height: 100vh; padding: 15px; }
         .container { max-width: 1100px; margin: 0 auto; }
-        header { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
-        h1 { color: #333; font-size: 26px; margin-bottom: 5px; }
+        header { background: #fff; padding: 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+        h1 { color: #333; font-size: 28px; margin-bottom: 8px; }
         h2 { color: #333; margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
-        .subtitle { color: #666; font-size: 13px; }
+        .subtitle { color: #666; font-size: 14px; }
         .tabs { display: flex; gap: 10px; margin-top: 15px; border-bottom: 2px solid #eee; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; background: 0; border: 0; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; color: #999; font-size: 14px; }
         .tab-btn:hover { color: #667eea; }
@@ -26,7 +26,7 @@
         input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
         input:focus, textarea:focus, select:focus { outline: 0; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.1); }
         button { padding: 10px 20px; background: #667eea; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all .3s; }
-        button:hover { background: #5568d3; transform: translateY(-1px); }
+        button:hover { background: #5568d3; }
         .btn-danger { background: #dc3545; }
         .btn-danger:hover { background: #c82333; }
         .btn-success { background: #28a745; }
@@ -41,42 +41,42 @@
         .msg-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .msg-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
         .loading { display: none; text-align: center; color: #667eea; padding: 10px; font-size: 13px; }
-        .file-upload { border: 2px dashed #667eea; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; background: #f8f9ff; }
-        .file-upload:hover { background: #eff1ff; border-color: #5568d3; }
-        .file-upload input { display: none; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
         .stat { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 15px; border-radius: 8px; text-align: center; }
         .stat-num { font-size: 24px; font-weight: bold; }
         .stat-label { font-size: 12px; margin-top: 5px; }
         .overflow-x { overflow-x: auto; }
-        .log-item { padding: 10px; border-left: 4px solid #667eea; background: #f8f9ff; margin-bottom: 8px; border-radius: 4px; font-size: 13px; }
-        .log-success { border-left-color: #28a745; background: #ecfdf5; }
-        .log-error { border-left-color: #dc3545; background: #fef2f2; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.7); z-index: 1000; }
         .modal.active { display: flex; align-items: center; justify-content: center; }
         .modal-content { background: #fff; border-radius: 10px; padding: 25px; max-width: 600px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-close { background: 0; border: 0; font-size: 28px; cursor: pointer; color: #999; padding: 0; width: auto; box-shadow: none; }
+        .modal-close { background: 0; border: 0; font-size: 28px; cursor: pointer; color: #999; padding: 0; box-shadow: none; }
         .tabs-inner { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #ddd; }
         .tab-inner { padding: 8px 15px; background: 0; border: 0; cursor: pointer; border-bottom: 2px solid transparent; color: #666; font-weight: 600; font-size: 13px; }
         .tab-inner:hover { color: #667eea; }
         .tab-inner.active { color: #667eea; border-bottom-color: #667eea; }
         .tab-inner-content { display: none; }
         .tab-inner-content.active { display: block; }
+        .file-upload { border: 2px dashed #667eea; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; background: #f8f9ff; }
+        .file-upload input { display: none; }
         textarea { min-height: 100px; resize: vertical; font-family: 'Courier New', monospace; }
-        .highlight { background: #f8f9ff; border: 2px solid #667eea; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+        .template-selector { background: #f8f9ff; border: 2px solid #667eea; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        .template-selector h3 { color: #667eea; margin-bottom: 10px; }
+        .template-option { padding: 10px; margin-bottom: 8px; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all .3s; }
+        .template-option:hover { border-color: #667eea; background: #f8f9ff; }
+        .template-option.selected { border-color: #667eea; background: #667eea; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📧 Email Campaign Manager v6.0</h1>
-            <p class="subtitle">✓ Smart From field ✓ All SMTP types ✓ Professional emails ✓ Production ready</p>
+            <h1>🔄 Dual Sender - Real Estate & Prayer Meetings</h1>
+            <p class="subtitle">Send property meetings OR prayer zoom invitations from one dashboard</p>
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-btn" onclick="switchTab('leads')">👥 Leads</button>
+                <button class="tab-btn" onclick="switchTab('leads')">👥 Contacts</button>
                 <button class="tab-btn" onclick="switchTab('templates')">📝 Templates</button>
-                <button class="tab-btn" onclick="switchTab('campaigns')">🚀 Campaigns</button>
+                <button class="tab-btn" onclick="switchTab('campaigns')">🚀 Send Campaign</button>
                 <button class="tab-btn" onclick="switchTab('logs')">📋 Logs</button>
                 <button class="tab-btn" onclick="switchTab('smtp')">⚙️ SMTP</button>
             </div>
@@ -85,49 +85,45 @@
         <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active">
             <div class="stats">
-                <div class="stat">
-                    <div class="stat-num" id="dashLeads">0</div>
-                    <div class="stat-label">Leads</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="dashTemplates">0</div>
-                    <div class="stat-label">Templates</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="dashCampaigns">0</div>
-                    <div class="stat-label">Campaigns</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="dashLogs">0</div>
-                    <div class="stat-label">Emails Sent</div>
-                </div>
+                <div class="stat"><div class="stat-num" id="dashContacts">0</div><div class="stat-label">Contacts</div></div>
+                <div class="stat"><div class="stat-num" id="dashTemplates">0</div><div class="stat-label">Templates</div></div>
+                <div class="stat"><div class="stat-num" id="dashCampaigns">0</div><div class="stat-label">Campaigns</div></div>
+                <div class="stat"><div class="stat-num" id="dashEmails">0</div><div class="stat-label">Emails Sent</div></div>
             </div>
             <div class="card">
-                <h2>✨ v6.0 - Professional Features</h2>
-                <p style="color:#666;line-height:1.6">✓ Smart From field (Name &lt;email&gt;) ✓ All SMTP types supported ✓ Paste/upload leads ✓ HTML templates ✓ Real email sending ✓ Complete logs ✓ Lead preview ✓ Production ready</p>
+                <h2>🎯 Quick Start</h2>
+                <p style="color:#666;line-height:1.6">This system supports TWO templates: Real Estate Property Meetings and Church Prayer Zoom Invitations. Choose which type you want to send, add your contacts, and launch campaigns!</p>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <h2>🏘️ Real Estate Sender</h2>
+                    <p style="color:#666;font-size:14px">Send property meeting invitations to property owners with Zoom links, meeting details, and property info.</p>
+                </div>
+                <div class="card">
+                    <h2>⛪ Prayer Meeting Sender</h2>
+                    <p style="color:#666;font-size:14px">Send church prayer meeting Zoom invitations to church members with prayer focus, Scripture verse, and meeting details.</p>
+                </div>
             </div>
         </div>
 
-        <!-- LEADS -->
+        <!-- LEADS / CONTACTS -->
         <div id="leads" class="tab-content">
             <div class="grid">
                 <div class="card">
-                    <h2>➕ Add Lead</h2>
+                    <h2>➕ Add Contact</h2>
                     <div id="addMsg" class="msg"></div>
                     <form id="addForm" onsubmit="addLead(event)">
                         <div class="form-group"><label>First Name</label><input type="text" id="fn"></div>
                         <div class="form-group"><label>Last Name</label><input type="text" id="ln"></div>
                         <div class="form-group"><label>Email *</label><input type="email" id="em" required></div>
                         <div class="form-group"><label>Phone</label><input type="text" id="ph"></div>
-                        <div class="form-group"><label>Address</label><input type="text" id="ad"></div>
-                        <div class="form-group"><label>Price</label><input type="text" id="pr"></div>
-                        <div class="form-group"><label>Type</label><input type="text" id="ty"></div>
-                        <button type="submit" class="btn-success" style="width:100%">Add Lead</button>
+                        <div class="form-group"><label>Property/Church Info</label><input type="text" id="ad" placeholder="(optional)"></div>
+                        <button type="submit" class="btn-success" style="width:100%">Add Contact</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h2>📤 Import Leads</h2>
+                    <h2>📤 Import Contacts</h2>
                     <div id="uploadMsg" class="msg"></div>
                     <div class="tabs-inner">
                         <button class="tab-inner active" onclick="switchImportTab('paste')">Paste</button>
@@ -135,10 +131,8 @@
                     </div>
                     <div id="paste" class="tab-inner-content active">
                         <div class="form-group" style="margin-bottom:0">
-                            <label>Paste CSV Data (with headers):</label>
-                            <textarea id="pasteArea" placeholder="First Name,Last Name,Email,Phone,Address,Price,Type
-John,Smith,john@example.com,+1-704-555-0101,123 Main St,$450000,House
-Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
+                            <label>Paste CSV:</label>
+                            <textarea id="pasteArea" placeholder="First Name,Last Name,Email,Phone"></textarea>
                             <button type="button" class="btn-success" onclick="pasteLead()" style="width:100%;margin-top:10px">Paste & Import</button>
                         </div>
                     </div>
@@ -157,7 +151,7 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             </div>
 
             <div class="card">
-                <h2>📋 All Leads</h2>
+                <h2>📋 All Contacts</h2>
                 <div style="margin-bottom:10px">
                     <input type="text" id="searchLead" placeholder="Search..." style="max-width:300px" oninput="renderLeads()">
                     <button class="btn-small" onclick="exportLeads()" style="margin-left:5px">📥 Export</button>
@@ -165,12 +159,8 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                 </div>
                 <div class="overflow-x">
                     <table>
-                        <thead>
-                            <tr><th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Address</th><th>Price</th><th>Type</th><th></th><th></th></tr>
-                        </thead>
-                        <tbody id="leadsTable">
-                            <tr><td colspan="9" style="text-align:center">No leads</td></tr>
-                        </tbody>
+                        <thead><tr><th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Info</th><th></th></tr></thead>
+                        <tbody id="leadsTable"><tr><td colspan="6">No contacts</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -178,51 +168,60 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
 
         <!-- TEMPLATES -->
         <div id="templates" class="tab-content">
-            <div class="grid">
-                <div class="card">
-                    <h2>📚 Templates</h2>
-                    <button class="btn-success" onclick="newTemplate()" style="width:100%;margin-bottom:10px">+ New</button>
-                    <div id="templatesList"></div>
-                </div>
-
-                <div class="card">
-                    <h2>✏️ Editor</h2>
-                    <div id="templateMsg" class="msg"></div>
-                    <div id="templateEditor" style="display:none">
-                        <form id="templateForm" onsubmit="saveTemplate(event)">
-                            <div class="form-group"><label>Template Name</label><input type="text" id="tname" required></div>
-                            <div class="form-group"><label>Subject Line</label><input type="text" id="tsubject" required placeholder="Buyer Interest in {{propertyAddress}}"></div>
-                            <div class="form-group"><label>HTML Content</label><textarea id="tcontent" required></textarea></div>
-                            <button type="submit" class="btn-success" style="width:100%">Save Template</button>
-                            <button type="button" class="btn-small" onclick="cancelTemplate()" style="width:100%;margin-top:5px;background:#999">Cancel</button>
-                        </form>
-                    </div>
-                    <div id="noTemplate" style="text-align:center;color:#999;padding:30px">Select a template to edit</div>
-                </div>
+            <div class="card">
+                <h2>📚 Available Templates</h2>
+                <div id="templatesList"></div>
             </div>
         </div>
 
         <!-- CAMPAIGNS -->
         <div id="campaigns" class="tab-content">
-            <div class="grid">
-                <div class="card">
-                    <h2>🚀 Send Campaign</h2>
-                    <div id="campaignMsg" class="msg"></div>
-                    <form id="campaignForm" onsubmit="sendCampaign(event)">
-                        <div class="form-group"><label>Template *</label><select id="ctemplate" required><option value="">Select...</option></select></div>
-                        <div class="form-group"><label>Zoom Link</label><input type="url" id="czoom" placeholder="https://zoom.us/j/..."></div>
-                        <div class="form-group"><label>Meeting Date</label><input type="text" id="cdate" placeholder="Feb 14, 2026"></div>
-                        <div class="form-group"><label>Meeting Time</label><input type="text" id="ctime" placeholder="3:00 PM EST"></div>
-                        <div class="loading" id="campaignLoading">⏳ Sending to all leads...</div>
-                        <button type="submit" class="btn-success" style="width:100%">Send Campaign to All Leads</button>
-                    </form>
+            <div class="card">
+                <h2>🚀 Send Campaign</h2>
+                <div id="campaignMsg" class="msg"></div>
+                
+                <!-- Template Selector -->
+                <div class="template-selector">
+                    <h3>Step 1: Choose Template Type</h3>
+                    <div class="template-option" onclick="selectTemplate(1)">
+                        <strong>🏘️ Real Estate - Property Meeting</strong>
+                        <p style="font-size:12px;margin-top:5px">Send buyer interest meeting with property details</p>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate(2)">
+                        <strong>⛪ Church - Prayer Meeting Zoom</strong>
+                        <p style="font-size:12px;margin-top:5px">Send prayer meeting invitation with Scripture verse</p>
+                    </div>
+                    <input type="hidden" id="selectedTemplate" value="">
                 </div>
 
-                <div class="card">
-                    <h2>📊 Campaign Status</h2>
-                    <p id="campaignStatus" style="color:#666;font-size:14px">Ready to send campaigns</p>
-                    <p id="campaignDetails" style="color:#999;font-size:13px;margin-top:10px"></p>
-                </div>
+                <form id="campaignForm" onsubmit="sendCampaign(event)">
+                    <h3 style="margin-top:20px;margin-bottom:15px">Step 2: Enter Meeting Details</h3>
+                    
+                    <div class="form-group"><label>Zoom Link *</label><input type="url" id="czoom" required placeholder="https://zoom.us/j/..."></div>
+                    <div class="form-group"><label>Meeting Date *</label><input type="text" id="cdate" required placeholder="February 14, 2026"></div>
+                    <div class="form-group"><label>Meeting Time *</label><input type="text" id="ctime" required placeholder="7:00 PM EST"></div>
+                    
+                    <!-- Real Estate Fields (hidden by default) -->
+                    <div id="realEstateFields" style="display:none">
+                        <div class="form-group"><label>Property Address</label><input type="text" id="propAddress" placeholder="123 Main Street"></div>
+                        <div class="form-group"><label>Property Type</label><input type="text" id="propType" placeholder="House, Condo, etc"></div>
+                        <div class="form-group"><label>Property Price</label><input type="text" id="propPrice" placeholder="$450,000"></div>
+                    </div>
+
+                    <!-- Prayer Fields (hidden by default) -->
+                    <div id="prayerFields" style="display:none">
+                        <div class="form-group"><label>Prayer Section Name</label><input type="text" id="prayerSection" placeholder="Monday Evening Prayer, Wednesday Night Prayer, etc"></div>
+                    </div>
+
+                    <div class="loading" id="campaignLoading">⏳ Sending...</div>
+                    <button type="submit" class="btn-success" style="width:100%;margin-top:15px">Send Campaign to All Contacts</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>📊 Campaign Status</h2>
+                <p id="campaignStatus" style="color:#666;font-size:14px">Ready to send campaigns</p>
+                <p id="campaignDetails" style="color:#999;font-size:13px;margin-top:10px"></p>
             </div>
         </div>
 
@@ -232,10 +231,10 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                 <h2>📋 Sending Logs</h2>
                 <div style="margin-bottom:10px">
                     <button class="btn-small" onclick="loadLogs()" style="margin-right:5px">🔄 Refresh</button>
-                    <button class="btn-small btn-danger" onclick="clearLogs()">Clear Logs</button>
+                    <button class="btn-small btn-danger" onclick="clearLogs()">Clear</button>
                 </div>
                 <div id="logsList" style="max-height:600px;overflow-y:auto">
-                    <div style="text-align:center;color:#999;padding:40px">No logs yet - send a campaign to see results</div>
+                    <div style="text-align:center;color:#999;padding:40px">No logs yet</div>
                 </div>
             </div>
         </div>
@@ -249,21 +248,13 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                     <form id="smtpForm" onsubmit="saveSmtp(event)">
                         <div class="form-group"><label>SMTP Host *</label><input type="text" id="shost" required placeholder="smtp.gmail.com"></div>
                         <div class="form-group"><label>Port *</label><input type="number" id="sport" required value="587"></div>
-                        <div class="form-group"><label>Encryption</label><select id="ssecure"><option value="false">TLS (Port 587)</option><option value="true">SSL (Port 465)</option></select></div>
-                        <div class="form-group"><label>Auth Email/Username *</label><input type="email" id="suser" required placeholder="your-email@gmail.com"></div>
-                        <div class="form-group"><label>Password/App Password *</label><input type="password" id="spass" required></div>
-                        
-                        <div class="highlight">
-                            <label style="font-weight:bold;color:#667eea;display:block;margin-bottom:10px">📧 Email Sender (From Field)</label>
-                            <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="John Smith or Company Name"></div>
-                            <div class="form-group"><label>From Email Address</label><input type="email" id="sfrom" placeholder="sender@company.com (optional)"></div>
-                            <p style="font-size:12px;color:#666;margin-top:8px">Recipients will see: "Sender Name &lt;From Email&gt;" in their inbox</p>
-                        </div>
-                        
-                        <div class="form-group"><label>Company Name</label><input type="text" id="scompany" placeholder="Your Real Estate Company"></div>
-                        <div class="form-group"><label>Company Phone</label><input type="text" id="sphone" placeholder="+1-555-1234"></div>
-                        
-                        <button type="submit" class="btn-success" style="width:100%">Save Settings Instantly</button>
+                        <div class="form-group"><label>Encryption</label><select id="ssecure"><option value="false">TLS (587)</option><option value="true">SSL (465)</option></select></div>
+                        <div class="form-group"><label>Email/Username *</label><input type="email" id="suser" required></div>
+                        <div class="form-group"><label>Password *</label><input type="password" id="spass" required></div>
+                        <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="Your Name"></div>
+                        <div class="form-group"><label>Company Name</label><input type="text" id="scompany" placeholder="Your Company/Church"></div>
+                        <div class="form-group"><label>Phone</label><input type="text" id="sphone" placeholder="+1-555-1234"></div>
+                        <button type="submit" class="btn-success" style="width:100%">Save Settings</button>
                     </form>
                 </div>
 
@@ -271,9 +262,9 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                     <h2>🧪 Test SMTP</h2>
                     <button onclick="testSmtp()" class="btn-success" style="width:100%;margin-bottom:10px">Test Connection</button>
                     <div id="testResult" class="msg"></div>
-                    <label style="margin-top:10px;display:block">Test Email Address</label>
+                    <label>Test Email</label>
                     <input type="email" id="testEmail" placeholder="your@email.com">
-                    <button onclick="sendTestEmail()" class="btn-success" style="width:100%;margin-top:10px">Send Test Email</button>
+                    <button onclick="sendTestEmail()" class="btn-success" style="width:100%;margin-top:10px">Send Test</button>
                 </div>
             </div>
         </div>
@@ -283,7 +274,7 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
     <div id="previewModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>👁️ Lead Details</h2>
+                <h2>Contact Details</h2>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div id="previewContent"></div>
@@ -295,7 +286,6 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
         let leads = [];
         let templates = [];
         let logs = [];
-        let editId = null;
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
@@ -304,7 +294,6 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             event.target.classList.add('active');
             if (tab === 'leads') loadLeads();
             if (tab === 'templates') loadTemplates();
-            if (tab === 'campaigns') { loadLeads(); loadTemplates(); }
             if (tab === 'logs') loadLogs();
             if (tab === 'dashboard') loadDash();
         }
@@ -314,6 +303,14 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             document.querySelectorAll('.tab-inner').forEach(e => e.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
             event.target.classList.add('active');
+        }
+
+        function selectTemplate(id) {
+            document.querySelectorAll('.template-option').forEach(e => e.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            document.getElementById('selectedTemplate').value = id;
+            document.getElementById('realEstateFields').style.display = id === 1 ? 'block' : 'none';
+            document.getElementById('prayerFields').style.display = id === 2 ? 'block' : 'none';
         }
 
         function showMsg(id, text, type) {
@@ -328,10 +325,10 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             leads = await fetch(`${API}/leads`).then(r => r.json()).catch(() => []);
             templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
             logs = await fetch(`${API}/campaigns/logs`).then(r => r.json()).catch(() => []);
-            document.getElementById('dashLeads').textContent = leads.length;
+            document.getElementById('dashContacts').textContent = leads.length;
             document.getElementById('dashTemplates').textContent = templates.length;
             document.getElementById('dashCampaigns').textContent = [...new Set(logs.map(l => l.campaignId))].length;
-            document.getElementById('dashLogs').textContent = logs.length;
+            document.getElementById('dashEmails').textContent = logs.length;
         }
 
         async function loadLeads() {
@@ -342,27 +339,8 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
         function renderLeads() {
             const search = document.getElementById('searchLead')?.value?.toLowerCase() || '';
             const f = leads.filter(l => (l.firstName + l.lastName + l.email).toLowerCase().includes(search));
-            const html = f.length ? f.map(l => `<tr><td>${l.firstName||'—'}</td><td>${l.lastName||'—'}</td><td>${l.email}</td><td>${l.phone||'—'}</td><td>${l.propertyAddress||'—'}</td><td style="color:#28a745;font-weight:600">${l.propertyPrice||'—'}</td><td>${l.propertyType||'—'}</td><td><button class="btn-small" onclick="previewLead(${l.id})">👁️</button></td><td><button class="btn-small btn-danger" onclick="deleteLead(${l.id})">🗑️</button></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center">No leads</td></tr>';
+            const html = f.length ? f.map(l => `<tr><td>${l.firstName||'—'}</td><td>${l.lastName||'—'}</td><td>${l.email}</td><td>${l.phone||'—'}</td><td>${l.propertyAddress||'—'}</td><td><button class="btn-small btn-danger" onclick="deleteLead(${l.id})">🗑️</button></td></tr>`).join('') : '<tr><td colspan="6">No contacts</td></tr>';
             document.getElementById('leadsTable').innerHTML = html;
-        }
-
-        function previewLead(id) {
-            const lead = leads.find(l => l.id === id);
-            if (!lead) return;
-            document.getElementById('previewContent').innerHTML = `<div style="line-height:1.8">
-                <p><strong>Name:</strong> ${lead.firstName} ${lead.lastName}</p>
-                <p><strong>Email:</strong> ${lead.email}</p>
-                <p><strong>Phone:</strong> ${lead.phone || 'N/A'}</p>
-                <p><strong>Property:</strong> ${lead.propertyAddress || 'N/A'}</p>
-                <p><strong>Price:</strong> ${lead.propertyPrice || 'N/A'}</p>
-                <p><strong>Type:</strong> ${lead.propertyType || 'N/A'}</p>
-                <p><strong>Added:</strong> ${new Date(lead.createdAt).toLocaleString()}</p>
-            </div>`;
-            document.getElementById('previewModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('previewModal').classList.remove('active');
         }
 
         async function addLead(e) {
@@ -375,26 +353,19 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                     lastName: document.getElementById('ln').value,
                     email: document.getElementById('em').value,
                     phone: document.getElementById('ph').value,
-                    propertyAddress: document.getElementById('ad').value,
-                    propertyPrice: document.getElementById('pr').value,
-                    propertyType: document.getElementById('ty').value
+                    propertyAddress: document.getElementById('ad').value
                 })
             }).then(r => r.json());
             if (r.success) {
                 document.getElementById('addForm').reset();
-                showMsg('addMsg', '✓ Lead added!', 'success');
+                showMsg('addMsg', '✓ Contact added!', 'success');
                 loadLeads();
-            } else {
-                showMsg('addMsg', '✗ ' + r.error, 'error');
-            }
+            } else showMsg('addMsg', '✗ ' + r.error, 'error');
         }
 
         async function pasteLead() {
             const text = document.getElementById('pasteArea').value;
-            if (!text) {
-                showMsg('uploadMsg', '⚠ Paste CSV data first', 'warning');
-                return;
-            }
+            if (!text) { showMsg('uploadMsg', '⚠ Paste data first', 'warning'); return; }
             document.getElementById('importLoading').style.display = 'block';
             const r = await fetch(`${API}/leads/paste`, {
                 method: 'POST',
@@ -404,7 +375,7 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             document.getElementById('addedCount').textContent = r.inserted || 0;
             document.getElementById('failedCount').textContent = r.failed || 0;
             document.getElementById('importStats').style.display = 'block';
-            showMsg('uploadMsg', `✓ ${r.inserted || 0} leads added!`, 'success');
+            showMsg('uploadMsg', `✓ ${r.inserted || 0} contacts added!`, 'success');
             document.getElementById('importLoading').style.display = 'none';
             document.getElementById('pasteArea').value = '';
             loadLeads();
@@ -423,104 +394,43 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             document.getElementById('addedCount').textContent = r.inserted || 0;
             document.getElementById('failedCount').textContent = r.failed || 0;
             document.getElementById('importStats').style.display = 'block';
-            showMsg('uploadMsg', `✓ ${r.inserted || 0} leads added!`, 'success');
+            showMsg('uploadMsg', `✓ ${r.inserted || 0} contacts added!`, 'success');
             document.getElementById('importLoading').style.display = 'none';
             loadLeads();
         }
 
         async function deleteLead(id) {
-            if (confirm('Delete this lead?')) {
+            if (confirm('Delete?')) {
                 await fetch(`${API}/leads/${id}`, { method: 'DELETE' });
                 loadLeads();
             }
         }
 
         function exportLeads() {
-            const csv = 'First,Last,Email,Phone,Address,Price,Type\n' + leads.map(l => `"${l.firstName||''}","${l.lastName||''}","${l.email}","${l.phone||''}","${l.propertyAddress||''}","${l.propertyPrice||''}","${l.propertyType||''}"`).join('\n');
+            const csv = 'First,Last,Email,Phone,Info\n' + leads.map(l => `"${l.firstName||''}","${l.lastName||''}","${l.email}","${l.phone||''}","${l.propertyAddress||''}"`).join('\n');
             const a = document.createElement('a');
             a.href = 'data:text/csv,' + encodeURIComponent(csv);
-            a.download = 'leads.csv';
+            a.download = 'contacts.csv';
             a.click();
         }
 
         async function clearAllData() {
-            if (confirm('🗑️ Delete ALL data? Cannot undo!')) {
+            if (confirm('Delete ALL data?')) {
                 const r = await fetch(`${API}/clear-all`, { method: 'POST' }).then(r => r.json());
-                if (r.success) {
-                    leads = [];
-                    templates = [];
-                    logs = [];
-                    renderLeads();
-                    loadTemplates();
-                    loadLogs();
-                    showMsg('addMsg', '✓ All data cleared!', 'success');
-                } else {
-                    showMsg('addMsg', '✗ Error clearing data', 'error');
-                }
+                if (r.success) { leads = []; templates = []; logs = []; renderLeads(); loadTemplates(); loadLogs(); showMsg('addMsg', '✓ Cleared!', 'success'); }
             }
         }
 
         async function loadTemplates() {
             templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
-            const html = templates.map(t => `<div style="padding:10px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;cursor:pointer;hover:background:#f9f9f9" onclick="editTemplate(${t.id})">${t.name}<br><small style="color:#999">${t.subject.substring(0,50)}</small></div>`).join('');
+            const html = templates.map(t => `<div style="padding:15px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;background:#f9f9f9"><strong>${t.name}</strong><p style="font-size:12px;color:#666;margin-top:5px">${t.subject.substring(0,60)}</p></div>`).join('');
             document.getElementById('templatesList').innerHTML = html;
-            document.getElementById('ctemplate').innerHTML = '<option value="">Select...</option>' + templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-        }
-
-        function newTemplate() {
-            editId = null;
-            document.getElementById('tname').value = '';
-            document.getElementById('tsubject').value = '';
-            document.getElementById('tcontent').value = '';
-            document.getElementById('templateEditor').style.display = 'block';
-            document.getElementById('noTemplate').style.display = 'none';
-        }
-
-        function editTemplate(id) {
-            const t = templates.find(x => x.id === id);
-            if (t) {
-                editId = id;
-                document.getElementById('tname').value = t.name;
-                document.getElementById('tsubject').value = t.subject;
-                document.getElementById('tcontent').value = t.html;
-                document.getElementById('templateEditor').style.display = 'block';
-                document.getElementById('noTemplate').style.display = 'none';
-            }
-        }
-
-        function cancelTemplate() {
-            document.getElementById('templateEditor').style.display = 'none';
-            document.getElementById('noTemplate').style.display = 'block';
-        }
-
-        async function saveTemplate(e) {
-            e.preventDefault();
-            const r = await fetch(`${API}/templates`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: editId,
-                    name: document.getElementById('tname').value,
-                    subject: document.getElementById('tsubject').value,
-                    html: document.getElementById('tcontent').value
-                })
-            }).then(r => r.json());
-            if (r.success) {
-                showMsg('templateMsg', '✓ Template saved!', 'success');
-                cancelTemplate();
-                loadTemplates();
-            } else {
-                showMsg('templateMsg', '✗ Error saving template', 'error');
-            }
         }
 
         async function sendCampaign(e) {
             e.preventDefault();
-            const tid = document.getElementById('ctemplate').value;
-            if (!tid) {
-                showMsg('campaignMsg', '⚠ Please select a template', 'warning');
-                return;
-            }
+            const tid = document.getElementById('selectedTemplate').value;
+            if (!tid) { showMsg('campaignMsg', '⚠ Select template first', 'warning'); return; }
             document.getElementById('campaignLoading').style.display = 'block';
             const r = await fetch(`${API}/campaigns/send`, {
                 method: 'POST',
@@ -529,31 +439,30 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                     templateId: parseInt(tid),
                     zoomLink: document.getElementById('czoom').value,
                     meetingDate: document.getElementById('cdate').value,
-                    meetingTime: document.getElementById('ctime').value
+                    meetingTime: document.getElementById('ctime').value,
+                    prayerSection: document.getElementById('prayerSection').value
                 })
             }).then(r => r.json());
             document.getElementById('campaignLoading').style.display = 'none';
             if (r.success) {
-                showMsg('campaignMsg', `✓ Campaign sent: ${r.sent} delivered, ${r.failed} failed!`, 'success');
+                showMsg('campaignMsg', `✓ Sent: ${r.sent} success, ${r.failed} failed!`, 'success');
                 document.getElementById('campaignForm').reset();
-                document.getElementById('campaignStatus').textContent = '✓ Campaign sent successfully!';
+                document.getElementById('campaignStatus').textContent = '✓ Campaign sent!';
                 document.getElementById('campaignDetails').textContent = `Delivered: ${r.sent} | Failed: ${r.failed}`;
                 loadLogs();
-            } else {
-                showMsg('campaignMsg', '✗ ' + r.error, 'error');
-            }
+            } else showMsg('campaignMsg', '✗ ' + r.error, 'error');
         }
 
         async function loadLogs() {
             logs = await fetch(`${API}/campaigns/logs`).then(r => r.json()).catch(() => []);
-            const html = logs.length ? logs.map(l => `<div class="log-item log-${l.status}"><strong>${l.leadName}</strong> (${l.leadEmail})<br><small>${l.message} - ${new Date(l.timestamp).toLocaleString()}</small></div>`).join('') : '<div style="text-align:center;color:#999;padding:40px">No logs yet</div>';
+            const html = logs.length ? logs.map(l => `<div style="padding:10px;border-left:4px solid ${l.status === 'success' ? '#28a745' : '#dc3545'};background:${l.status === 'success' ? '#ecfdf5' : '#fef2f2'};margin-bottom:8px;border-radius:4px;font-size:13px"><strong>${l.leadName}</strong> (${l.leadEmail})<br><small>${l.message} - ${new Date(l.timestamp).toLocaleString()}</small></div>`).join('') : '<div style="text-align:center;color:#999;padding:40px">No logs</div>';
             document.getElementById('logsList').innerHTML = html;
         }
 
         function clearLogs() {
             if (confirm('Clear all logs?')) {
                 logs = [];
-                document.getElementById('logsList').innerHTML = '<div style="text-align:center;color:#999;padding:40px">Logs cleared</div>';
+                document.getElementById('logsList').innerHTML = '<div style="text-align:center;color:#999;padding:40px">Cleared</div>';
             }
         }
 
@@ -565,7 +474,6 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             document.getElementById('suser').value = s.user || '';
             document.getElementById('spass').value = s.pass || '';
             document.getElementById('ssendername').value = s.senderName || '';
-            document.getElementById('sfrom').value = s.fromEmail || '';
             document.getElementById('scompany').value = s.companyName || '';
             document.getElementById('sphone').value = s.companyPhone || '';
         }
@@ -582,16 +490,12 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
                     user: document.getElementById('suser').value,
                     pass: document.getElementById('spass').value,
                     senderName: document.getElementById('ssendername').value,
-                    fromEmail: document.getElementById('sfrom').value,
                     companyName: document.getElementById('scompany').value,
                     companyPhone: document.getElementById('sphone').value
                 })
             }).then(r => r.json());
-            if (r.success) {
-                showMsg('smtpMsg', '✓ Settings saved instantly!', 'success');
-            } else {
-                showMsg('smtpMsg', '✗ Error saving settings', 'error');
-            }
+            if (r.success) showMsg('smtpMsg', '✓ Saved!', 'success');
+            else showMsg('smtpMsg', '✗ Error', 'error');
         }
 
         async function testSmtp() {
@@ -601,10 +505,7 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
 
         async function sendTestEmail() {
             const email = document.getElementById('testEmail').value;
-            if (!email) {
-                showMsg('smtpMsg', '⚠ Enter test email address', 'warning');
-                return;
-            }
+            if (!email) { showMsg('smtpMsg', '⚠ Enter email', 'warning'); return; }
             const r = await fetch(`${API}/smtp-test-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -613,7 +514,10 @@ Jane,Doe,jane@example.com,+1-704-555-0102,456 Oak Ave,$550000,Condo"></textarea>
             showMsg('testResult', r.success ? '✓ ' + r.message : '✗ ' + r.error, r.success ? 'success' : 'error');
         }
 
-        // Initialize
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+
         loadDash();
         loadSmtp();
     </script>
