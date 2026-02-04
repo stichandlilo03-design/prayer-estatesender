@@ -131,21 +131,23 @@
                     </div>
                     <div id="paste" class="tab-inner-content active">
                         <div class="form-group" style="margin-bottom:0">
-                            <label>Paste CSV:</label>
-                            <textarea id="pasteArea" placeholder="First Name,Last Name,Email,Phone"></textarea>
+                            <label>Paste emails or CSV data:</label>
+                            <textarea id="pasteArea" placeholder="Paste one email per line:&#10;stevenkilan@gmail.com&#10;john.doe@yahoo.com&#10;mary_smith@outlook.com&#10;&#10;Or full CSV:&#10;First Name,Last Name,Email,Phone"></textarea>
+                            <p style="font-size:11px;color:#888;margin-top:5px">💡 <strong>Smart detect:</strong> Paste just emails (one per line) and names are auto-extracted. e.g. <em>stevenkilan@gmail.com</em> → First Name: <em>Steven</em>, Last Name: <em>Kilan</em></p>
                             <button type="button" class="btn-success" onclick="pasteLead()" style="width:100%;margin-top:10px">Paste & Import</button>
                         </div>
                     </div>
                     <div id="upload" class="tab-inner-content">
                         <div class="file-upload" onclick="document.getElementById('file').click()">
-                            <input type="file" id="file" accept=".csv,.xlsx,.xls" onchange="uploadFile(event)">
-                            <p style="color:#667eea;font-weight:600">📁 Click to upload CSV/Excel</p>
+                            <input type="file" id="file" accept=".csv,.xlsx,.xls,.txt" onchange="uploadFile(event)">
+                            <p style="color:#667eea;font-weight:600">📁 Click to upload CSV/Excel/TXT</p>
+                            <p style="font-size:11px;color:#888;margin-top:5px">💡 TXT files with one email per line are supported — names auto-extracted</p>
                         </div>
                     </div>
                     <div class="loading" id="importLoading">⏳ Processing...</div>
                     <div id="importStats" style="display:none;margin-top:10px">
                         <div style="padding:10px;background:#d4edda;border-radius:6px;margin-bottom:8px;color:#155724;font-size:13px">✓ Added: <strong id="addedCount">0</strong></div>
-                        <div style="padding:10px;background:#fff3cd;border-radius:6px;color:#856404;font-size:13px">⚠ Failed: <strong id="failedCount">0</strong></div>
+                        <div style="padding:10px;background:#fff3cd;border-radius:6px;color:#856404;font-size:13px">⚠ Failed/Skipped: <strong id="failedCount">0</strong></div>
                     </div>
                 </div>
             </div>
@@ -342,6 +344,157 @@
         let templates = [];
         let logs = [];
 
+        // ============================================================
+        // SMART NAME EXTRACTION FROM EMAIL ADDRESS
+        // ============================================================
+        // Takes an email like "stevenkilan@gmail.com" and returns
+        // { firstName: "Steven", lastName: "Kilan" }
+        // Handles: dots, underscores, hyphens, numbers, camelCase
+        // ============================================================
+        function extractNameFromEmail(email) {
+            if (!email || !email.includes('@')) return { firstName: '', lastName: '' };
+
+            // Get the part before @
+            let local = email.split('@')[0].trim().toLowerCase();
+
+            // Remove trailing numbers (e.g. john.doe92 -> john.doe)
+            local = local.replace(/\d+$/g, '');
+
+            // Remove leading numbers
+            local = local.replace(/^\d+/g, '');
+
+            // If empty after cleanup, fallback
+            if (!local) {
+                local = email.split('@')[0].trim();
+            }
+
+            let parts = [];
+
+            // Split by common separators: dot, underscore, hyphen
+            if (/[._\-]/.test(local)) {
+                parts = local.split(/[._\-]+/).filter(p => p.length > 0);
+            } else {
+                // Try camelCase split: "stevenkilan" -> try to find two names
+                // Look for camelCase like "stevenKilan"
+                const camelParts = local.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ');
+                if (camelParts.length > 1) {
+                    parts = camelParts;
+                } else {
+                    // Single block like "stevenkilan" — try common name detection
+                    // Use a simple heuristic: if length > 5, try to split roughly in half
+                    // But first, check for double consonant or vowel-consonant transitions
+                    parts = smartSplitName(local);
+                }
+            }
+
+            // Clean up: remove pure number parts, very short fragments
+            parts = parts.filter(p => p.replace(/\d/g, '').length > 0);
+
+            // Capitalize each part
+            const capitalize = (str) => {
+                if (!str) return '';
+                str = str.replace(/\d/g, ''); // strip leftover numbers
+                return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+            };
+
+            let firstName = '', lastName = '';
+
+            if (parts.length >= 2) {
+                firstName = capitalize(parts[0]);
+                lastName = capitalize(parts.slice(1).join(' '));
+            } else if (parts.length === 1) {
+                firstName = capitalize(parts[0]);
+                lastName = '';
+            }
+
+            return { firstName, lastName };
+        }
+
+        // Attempt to intelligently split a single-block name like "stevenkilan"
+        function smartSplitName(str) {
+            if (str.length <= 3) return [str];
+
+            // Common first names to try matching at the start
+            const commonNames = [
+                'james','john','robert','michael','david','william','richard','joseph','thomas','charles',
+                'christopher','daniel','matthew','anthony','mark','donald','steven','steve','paul','andrew',
+                'joshua','kenneth','kevin','brian','george','timothy','ronald','edward','jason','jeffrey',
+                'ryan','jacob','gary','nicholas','eric','jonathan','stephen','larry','justin','scott',
+                'brandon','benjamin','samuel','raymond','gregory','frank','alexander','patrick','jack','dennis',
+                'jerry','tyler','aaron','jose','adam','nathan','henry','peter','zachary','douglas',
+                'mary','patricia','jennifer','linda','barbara','elizabeth','susan','jessica','sarah','karen',
+                'lisa','nancy','betty','margaret','sandra','ashley','dorothy','kimberly','emily','donna',
+                'michelle','carol','amanda','melissa','deborah','stephanie','rebecca','sharon','laura','cynthia',
+                'kathleen','amy','angela','shirley','anna','brenda','pamela','emma','nicole','helen',
+                'samantha','katherine','christine','debra','rachel','carolyn','janet','catherine','maria','heather',
+                'diane','ruth','julie','olivia','joyce','virginia','victoria','kelly','lauren','christina',
+                'joan','evelyn','judith','megan','andrea','cheryl','hannah','jacqueline','martha','gloria',
+                'teresa','ann','sara','madison','frances','kathryn','janice','jean','abigail','alice',
+                'grace','rosa','peter','philip','roger','ralph','roy','eugene','randy','wayne',
+                'alan','carl','albert','arthur','lawrence','jesse','dylan','bryan','joe','jordan',
+                'billy','bruce','willie','gabriel','logan','allan','luke','don','elijah','isaac'
+            ];
+
+            // Try to match a common first name at the beginning
+            for (const name of commonNames) {
+                if (str.startsWith(name) && str.length > name.length) {
+                    const remainder = str.slice(name.length);
+                    if (remainder.length >= 2) {
+                        return [name, remainder];
+                    }
+                }
+            }
+
+            // If no common name match, return as single first name
+            return [str];
+        }
+
+        // Check if a line looks like an email address
+        function isEmailLine(line) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(line.trim());
+        }
+
+        // Check if text is "one email per line" format vs CSV
+        function isEmailPerLineFormat(text) {
+            const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length === 0) return false;
+
+            // If most lines (>= 70%) are plain email addresses, treat as email-per-line
+            let emailCount = 0;
+            for (const line of lines) {
+                if (isEmailLine(line)) emailCount++;
+            }
+            return (emailCount / lines.length) >= 0.7;
+        }
+
+        // Parse email-per-line text into contacts array
+        function parseEmailPerLine(text) {
+            const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const contacts = [];
+            const failed = [];
+
+            for (const line of lines) {
+                const email = line.trim();
+                if (isEmailLine(email)) {
+                    const { firstName, lastName } = extractNameFromEmail(email);
+                    contacts.push({
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email.toLowerCase(),
+                        phone: '',
+                        propertyAddress: ''
+                    });
+                } else {
+                    failed.push(line);
+                }
+            }
+
+            return { contacts, failed };
+        }
+
+        // ============================================================
+        // TAB SWITCHING
+        // ============================================================
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
@@ -387,6 +540,9 @@
             setTimeout(() => el.style.display = 'none', 5000);
         }
 
+        // ============================================================
+        // DASHBOARD
+        // ============================================================
         async function loadDash() {
             leads = await fetch(`${API}/leads`).then(r => r.json()).catch(() => []);
             templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
@@ -397,6 +553,9 @@
             document.getElementById('dashEmails').textContent = logs.length;
         }
 
+        // ============================================================
+        // LEADS / CONTACTS
+        // ============================================================
         async function loadLeads() {
             leads = await fetch(`${API}/leads`).then(r => r.json()).catch(() => []);
             renderLeads();
@@ -429,28 +588,114 @@
             } else showMsg('addMsg', '✗ ' + r.error, 'error');
         }
 
+        // ============================================================
+        // PASTE IMPORT — NOW WITH SMART EMAIL DETECTION
+        // ============================================================
         async function pasteLead() {
             const text = document.getElementById('pasteArea').value;
-            if (!text) { showMsg('uploadMsg', '⚠ Paste data first', 'warning'); return; }
+            if (!text.trim()) { showMsg('uploadMsg', '⚠ Paste data first', 'warning'); return; }
+            
             document.getElementById('importLoading').style.display = 'block';
-            const r = await fetch(`${API}/leads/paste`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
-            }).then(r => r.json()).catch(() => ({ inserted: 0, failed: 0 }));
-            document.getElementById('addedCount').textContent = r.inserted || 0;
-            document.getElementById('failedCount').textContent = r.failed || 0;
-            document.getElementById('importStats').style.display = 'block';
-            showMsg('uploadMsg', `✓ ${r.inserted || 0} contacts added!`, 'success');
-            document.getElementById('importLoading').style.display = 'none';
-            document.getElementById('pasteArea').value = '';
-            loadLeads();
+            document.getElementById('importStats').style.display = 'none';
+
+            // Check if it's email-per-line format
+            if (isEmailPerLineFormat(text)) {
+                // CLIENT-SIDE: parse emails and extract names, then send individually
+                const { contacts, failed } = parseEmailPerLine(text);
+                let inserted = 0;
+                let failCount = failed.length;
+
+                for (const contact of contacts) {
+                    try {
+                        const r = await fetch(`${API}/leads`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(contact)
+                        }).then(r => r.json());
+                        if (r.success) inserted++;
+                        else failCount++;
+                    } catch (err) {
+                        failCount++;
+                    }
+                }
+
+                document.getElementById('addedCount').textContent = inserted;
+                document.getElementById('failedCount').textContent = failCount;
+                document.getElementById('importStats').style.display = 'block';
+                showMsg('uploadMsg', `✓ ${inserted} contacts imported from emails! Names auto-detected.`, 'success');
+                document.getElementById('importLoading').style.display = 'none';
+                document.getElementById('pasteArea').value = '';
+                loadLeads();
+            } else {
+                // ORIGINAL CSV FORMAT — send to server paste endpoint
+                const r = await fetch(`${API}/leads/paste`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                }).then(r => r.json()).catch(() => ({ inserted: 0, failed: 0 }));
+                document.getElementById('addedCount').textContent = r.inserted || 0;
+                document.getElementById('failedCount').textContent = r.failed || 0;
+                document.getElementById('importStats').style.display = 'block';
+                showMsg('uploadMsg', `✓ ${r.inserted || 0} contacts added!`, 'success');
+                document.getElementById('importLoading').style.display = 'none';
+                document.getElementById('pasteArea').value = '';
+                loadLeads();
+            }
         }
 
+        // ============================================================
+        // FILE UPLOAD — NOW ALSO HANDLES .TXT WITH EMAILS
+        // ============================================================
         async function uploadFile(e) {
             const file = e.target.files[0];
             if (!file) return;
             document.getElementById('importLoading').style.display = 'block';
+            document.getElementById('importStats').style.display = 'none';
+
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            // If it's a .txt file, read it and use the smart email parser
+            if (ext === 'txt') {
+                const reader = new FileReader();
+                reader.onload = async function(ev) {
+                    const text = ev.target.result;
+                    if (isEmailPerLineFormat(text)) {
+                        const { contacts, failed } = parseEmailPerLine(text);
+                        let inserted = 0;
+                        let failCount = failed.length;
+
+                        for (const contact of contacts) {
+                            try {
+                                const r = await fetch(`${API}/leads`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(contact)
+                                }).then(r => r.json());
+                                if (r.success) inserted++;
+                                else failCount++;
+                            } catch (err) {
+                                failCount++;
+                            }
+                        }
+
+                        document.getElementById('addedCount').textContent = inserted;
+                        document.getElementById('failedCount').textContent = failCount;
+                        document.getElementById('importStats').style.display = 'block';
+                        showMsg('uploadMsg', `✓ ${inserted} contacts imported from TXT! Names auto-detected.`, 'success');
+                        document.getElementById('importLoading').style.display = 'none';
+                        loadLeads();
+                    } else {
+                        // Treat as CSV-like text
+                        document.getElementById('pasteArea').value = text;
+                        document.getElementById('importLoading').style.display = 'none';
+                        showMsg('uploadMsg', '💡 File loaded into paste area. Click "Paste & Import" to process.', 'warning');
+                    }
+                };
+                reader.readAsText(file);
+                return;
+            }
+
+            // For CSV / Excel files — use original upload endpoint
             const fd = new FormData();
             fd.append('file', file);
             const r = await fetch(`${API}/leads/upload`, {
@@ -487,6 +732,9 @@
             }
         }
 
+        // ============================================================
+        // TEMPLATES
+        // ============================================================
         async function loadTemplates() {
             templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
             const html = templates.map(t => `<div style="padding:15px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;background:#f9f9f9;cursor:pointer;transition:all .3s" onclick="editTemplate(${t.id})" onmouseover="this.style.background='#e8f0ff'" onmouseout="this.style.background='#f9f9f9'"><strong>${t.name}</strong><p style="font-size:12px;color:#666;margin-top:5px">${t.subject.substring(0,60)}</p></div>`).join('');
@@ -542,6 +790,9 @@
             }
         }
 
+        // ============================================================
+        // CAMPAIGNS
+        // ============================================================
         async function sendCampaign(e) {
             e.preventDefault();
             const tid = document.getElementById('selectedTemplate').value;
@@ -568,6 +819,9 @@
             } else showMsg('campaignMsg', '✗ ' + r.error, 'error');
         }
 
+        // ============================================================
+        // LOGS
+        // ============================================================
         async function loadLogs() {
             logs = await fetch(`${API}/campaigns/logs`).then(r => r.json()).catch(() => []);
             const html = logs.length ? logs.map(l => `<div style="padding:10px;border-left:4px solid ${l.status === 'success' ? '#28a745' : '#dc3545'};background:${l.status === 'success' ? '#ecfdf5' : '#fef2f2'};margin-bottom:8px;border-radius:4px;font-size:13px"><strong>${l.leadName}</strong> (${l.leadEmail})<br><small>${l.message} - ${new Date(l.timestamp).toLocaleString()}</small></div>`).join('') : '<div style="text-align:center;color:#999;padding:40px">No logs</div>';
@@ -581,6 +835,9 @@
             }
         }
 
+        // ============================================================
+        // SMTP
+        // ============================================================
         async function loadSmtp() {
             const s = await fetch(`${API}/smtp-settings`).then(r => r.json()).catch(() => ({}));
             document.getElementById('shost').value = s.host || '';
@@ -596,7 +853,6 @@
         async function saveSmtp(e) {
             e.preventDefault();
             
-            // Check host is always required
             if (!document.getElementById('shost').value) {
                 showMsg('smtpMsg', '⚠ SMTP Host is required', 'warning');
                 return;
