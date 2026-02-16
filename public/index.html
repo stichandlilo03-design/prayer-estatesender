@@ -590,7 +590,51 @@
     </div>
 </div>
 
-<script src="https://smtpjs.com/v3/smtp.js"></script>
+<script>
+// ================================================================
+// INLINE SmtpJS — no external CDN dependency
+// ================================================================
+var Email = {
+    send: function(params) {
+        return new Promise(function(resolve, reject) {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function() {
+                if (request.readyState === 4) {
+                    if (request.status === 200) {
+                        resolve(request.responseText);
+                    } else {
+                        reject(new Error('SMTP request failed with status ' + request.status + ': ' + request.responseText));
+                    }
+                }
+            };
+            request.onerror = function() {
+                reject(new Error('Network error — cannot reach SMTP relay'));
+            };
+            request.ontimeout = function() {
+                reject(new Error('SMTP request timed out'));
+            };
+            request.timeout = 30000;
+            try {
+                request.open("POST", "https://smtpjs.com/v3/smtpjs.aspx", true);
+                request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                request.send(
+                    "Host=" + encodeURIComponent(params.Host) +
+                    "&Username=" + encodeURIComponent(params.Username) +
+                    "&Password=" + encodeURIComponent(params.Password) +
+                    "&To=" + encodeURIComponent(params.To) +
+                    "&From=" + encodeURIComponent(params.From) +
+                    "&Subject=" + encodeURIComponent(params.Subject) +
+                    "&Body=" + encodeURIComponent(params.Body) +
+                    "&Port=" + encodeURIComponent(params.Port || "25") +
+                    "&Action=Send"
+                );
+            } catch(e) {
+                reject(e);
+            }
+        });
+    }
+};
+</script>
 <script>
 // ================================================================
 // DATA STORE (in-memory)
@@ -776,21 +820,21 @@ function renderTemplates() {
 // CAMPAIGNS — REAL SMTP SENDING via SmtpJS
 // ================================================================
 async function realSendEmail(to, subject, htmlBody) {
-    if (typeof Email === 'undefined') {
-        throw new Error('SmtpJS not loaded — check internet connection');
+    try {
+        const result = await Email.send({
+            Host: smtpSettings.host,
+            Username: smtpSettings.user,
+            Password: smtpSettings.pass,
+            To: to,
+            From: smtpSettings.user,
+            Subject: subject,
+            Body: htmlBody,
+            Port: String(smtpSettings.port)
+        });
+        return result;
+    } catch (err) {
+        throw new Error(err.message || 'Failed to send email');
     }
-    const result = await Email.send({
-        Host: smtpSettings.host,
-        Username: smtpSettings.user,
-        Password: smtpSettings.pass,
-        To: to,
-        From: smtpSettings.user,
-        Subject: subject,
-        Body: htmlBody,
-        Port: smtpSettings.port,
-        Security: smtpSettings.encryption === 'ssl' ? 'SSL' : (smtpSettings.encryption === 'starttls' ? 'TLS' : undefined)
-    });
-    return result;
 }
 
 async function sendCampaign(templateId, vars) {
