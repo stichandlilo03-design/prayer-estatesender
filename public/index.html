@@ -356,8 +356,8 @@
                 <h2>🎯 Quick Start</h2>
                 <p style="color:var(--gray-500);line-height:1.7;font-size:14px">
                     This standalone dashboard supports <strong>two campaign types</strong>: Real Estate Property Meetings and Church Prayer Zoom Invitations.
-                    Add contacts, choose a template, fill in details, and send <strong>real emails</strong> via your SMTP server. Configure SMTP first, then test before sending campaigns.<br>
-                    <strong style="color:var(--danger)">📥 Download this file and open in your browser for full functionality.</strong> All your data (contacts, settings, templates) is saved and persists between reloads.
+                    Add contacts, choose a template, fill in details, and send <strong>real emails</strong> via your SMTP server. Configure SMTP first, then test before sending campaigns.
+                    All your data (contacts, settings, templates) is <strong>saved automatically</strong> and persists between reloads.
                 </p>
             </div>
             <div class="grid">
@@ -534,7 +534,7 @@
                 <div class="card">
                     <h2>⚙️ SMTP Configuration</h2>
                     <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#4338ca;line-height:1.6">
-                        <strong>⚠️ Important:</strong> Download this file and open it in your browser for email sending to work. It won't work inside Claude's preview.<br>
+                        <strong>⚠️ Important:</strong> Emails are sent via SmtpJS relay (smtpjs.com). Your SMTP credentials are sent securely to their server which delivers the email.<br>
                         <strong>💡 Gmail:</strong> <code>smtp.gmail.com</code>, port <code>465</code>, SSL/TLS + <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#4f46e5;font-weight:600">App Password</a><br>
                         <strong>Outlook:</strong> <code>smtp-mail.outlook.com</code>, port <code>587</code>, STARTTLS<br>
                         <strong>Yahoo:</strong> <code>smtp.mail.yahoo.com</code>, port <code>465</code>, SSL/TLS + App Password<br>
@@ -572,7 +572,7 @@
                     <h2>🧪 Test Connection</h2>
                     <div id="testResult" class="msg"></div>
                     <p style="color:var(--gray-500);font-size:13px;margin-bottom:12px">
-                        Send a real test email to verify your SMTP credentials. <strong>You must download this file and open in your browser</strong> — email sending is blocked inside Claude's preview window.
+                        Send a real test email to verify your SMTP credentials. Make sure you've saved your settings above first.
                     </p>
                     <div class="form-group"><label>Test Email Address</label><input type="email" id="testEmail" placeholder="your@email.com"></div>
                     <button class="btn-success btn-block" id="sendTestBtn">Send Test Email</button>
@@ -596,40 +596,83 @@
 
 <script>
 // ================================================================
-// SMTP EMAIL SENDER — uses SmtpJS relay via fetch
+// SMTP EMAIL SENDER — robust multi-method approach
 // ================================================================
-var Email = {
-    send: function(params) {
-        return new Promise(function(resolve, reject) {
-            var payload = 
-                "Host=" + encodeURIComponent(params.Host) +
-                "&Username=" + encodeURIComponent(params.Username) +
-                "&Password=" + encodeURIComponent(params.Password) +
-                "&To=" + encodeURIComponent(params.To) +
-                "&From=" + encodeURIComponent(params.From) +
-                "&Subject=" + encodeURIComponent(params.Subject) +
-                "&Body=" + encodeURIComponent(params.Body) +
-                "&Port=" + encodeURIComponent(params.Port || "25") +
-                "&Action=Send";
+var smtpReady = false;
 
-            fetch("https://smtpjs.com/v3/smtpjs.aspx", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: payload
-            })
-            .then(function(resp) {
-                if (!resp.ok) throw new Error("HTTP " + resp.status);
-                return resp.text();
-            })
-            .then(function(text) { resolve(text); })
-            .catch(function(err) { reject(err); });
-        });
+// Method 1: Load official SmtpJS library dynamically
+(function() {
+    var s = document.createElement('script');
+    s.src = 'https://smtpjs.com/v3/smtp.js';
+    s.onload = function() { smtpReady = true; console.log('SmtpJS loaded from CDN'); };
+    s.onerror = function() { console.log('SmtpJS CDN failed, using built-in sender'); };
+    document.head.appendChild(s);
+})();
+
+// Method 2: Built-in fallback sender via XMLHttpRequest
+function sendViaXHR(params) {
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://smtpjs.com/v3/smtpjs.aspx", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.timeout = 30000;
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.responseText);
+            } else {
+                reject(new Error("Server returned " + xhr.status));
+            }
+        };
+        xhr.onerror = function() { reject(new Error("Network error contacting SMTP relay")); };
+        xhr.ontimeout = function() { reject(new Error("Request timed out after 30s")); };
+        xhr.send(
+            "Host=" + encodeURIComponent(params.Host) +
+            "&Username=" + encodeURIComponent(params.Username) +
+            "&Password=" + encodeURIComponent(params.Password) +
+            "&To=" + encodeURIComponent(params.To) +
+            "&From=" + encodeURIComponent(params.From) +
+            "&Subject=" + encodeURIComponent(params.Subject) +
+            "&Body=" + encodeURIComponent(params.Body) +
+            "&Port=" + encodeURIComponent(params.Port || "25") +
+            "&Action=Send"
+        );
+    });
+}
+
+// Method 3: fetch-based fallback
+function sendViaFetch(params) {
+    return fetch("https://smtpjs.com/v3/smtpjs.aspx", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "Host=" + encodeURIComponent(params.Host) +
+              "&Username=" + encodeURIComponent(params.Username) +
+              "&Password=" + encodeURIComponent(params.Password) +
+              "&To=" + encodeURIComponent(params.To) +
+              "&From=" + encodeURIComponent(params.From) +
+              "&Subject=" + encodeURIComponent(params.Subject) +
+              "&Body=" + encodeURIComponent(params.Body) +
+              "&Port=" + encodeURIComponent(params.Port || "25") +
+              "&Action=Send"
+    }).then(function(r) { return r.text(); });
+}
+
+// Unified send function — tries all methods
+function sendEmail(params) {
+    // Try CDN-loaded Email.send first
+    if (smtpReady && typeof Email !== 'undefined' && Email.send) {
+        return Email.send(params);
     }
-};
-
-// ================================================================
-// DATA STORE with localStorage persistence
-// ================================================================
+    // Try XHR
+    return sendViaXHR(params).catch(function(xhrErr) {
+        console.log("XHR failed:", xhrErr.message, "— trying fetch");
+        // Try fetch as last resort
+        return sendViaFetch(params).catch(function(fetchErr) {
+            throw new Error("All send methods failed. XHR: " + xhrErr.message + " | Fetch: " + fetchErr.message);
+        });
+    });
+}
+</script>
+<script>
 var STORAGE_KEY = 'dualSender_';
 
 function saveData() {
@@ -872,21 +915,17 @@ function renderTemplates() {
 // CAMPAIGNS — REAL SMTP SENDING via SmtpJS
 // ================================================================
 async function realSendEmail(to, subject, htmlBody) {
-    try {
-        const result = await Email.send({
-            Host: smtpSettings.host,
-            Username: smtpSettings.user,
-            Password: smtpSettings.pass,
-            To: to,
-            From: smtpSettings.user,
-            Subject: subject,
-            Body: htmlBody,
-            Port: String(smtpSettings.port)
-        });
-        return result;
-    } catch (err) {
-        throw new Error(err.message || 'Failed to send email');
-    }
+    var result = await sendEmail({
+        Host: smtpSettings.host,
+        Username: smtpSettings.user,
+        Password: smtpSettings.pass,
+        To: to,
+        From: smtpSettings.user,
+        Subject: subject,
+        Body: htmlBody,
+        Port: String(smtpSettings.port)
+    });
+    return result;
 }
 
 async function sendCampaign(templateId, vars) {
@@ -894,11 +933,6 @@ async function sendCampaign(templateId, vars) {
     if (!tpl) return { sent: 0, failed: 0, error: 'Template not found' };
     if (!leads.length) return { sent: 0, failed: 0, error: 'No contacts to send to' };
     if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) return { sent: 0, failed: 0, error: 'SMTP not fully configured — go to SMTP tab and fill in Host, Username & Password' };
-
-    // Check if running in sandbox
-    if (window.location.protocol === 'blob:' || document.referrer.includes('claude')) {
-        return { sent: 0, failed: 0, error: 'Download this HTML file and open in your browser first. Sending is blocked inside Claude preview.' };
-    }
 
     let sent = 0, failed = 0;
     const cid = ++campaignCount;
@@ -1227,12 +1261,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!email) { showMsg('testResult', '⚠ Enter an email address', 'warning'); return; }
         if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) { showMsg('testResult', '✗ Save SMTP settings first (Host, Username & Password required)', 'error'); return; }
 
-        // Check if running in sandbox/preview
-        if (window.location.protocol === 'blob:' || window.location.hostname === 'localhost' || document.referrer.includes('claude')) {
-            showMsg('testResult', '⚠ Download this HTML file first, then open it in Chrome/Firefox. Sending is blocked in Claude preview.', 'warning');
-            return;
-        }
-
         const btn = document.getElementById('sendTestBtn');
         btn.disabled = true; btn.textContent = '⏳ Sending test...';
         showMsg('testResult', '⏳ Connecting to ' + smtpSettings.host + '...', 'warning');
@@ -1252,8 +1280,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             var errMsg = err.message || 'Unknown error';
-            if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('Network')) {
-                errMsg = 'Network blocked — make sure you downloaded this file and opened it in your browser (not inside Claude).';
+            if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('Network error')) {
+                errMsg = 'Cannot reach SMTP relay server (smtpjs.com). Check your internet connection or try again.';
             }
             showMsg('testResult', '✗ ' + errMsg, 'error');
             document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Connection error</div>';
