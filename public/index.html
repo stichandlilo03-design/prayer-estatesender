@@ -356,7 +356,8 @@
                 <h2>🎯 Quick Start</h2>
                 <p style="color:var(--gray-500);line-height:1.7;font-size:14px">
                     This standalone dashboard supports <strong>two campaign types</strong>: Real Estate Property Meetings and Church Prayer Zoom Invitations.
-                    Add contacts, choose a template, fill in details, and send <strong>real emails</strong> via your SMTP server. Configure SMTP first, then test before sending campaigns.
+                    Add contacts, choose a template, fill in details, and send <strong>real emails</strong> via your SMTP server. Configure SMTP first, then test before sending campaigns.<br>
+                    <strong style="color:var(--danger)">📥 Download this file and open in your browser for full functionality.</strong> All your data (contacts, settings, templates) is saved and persists between reloads.
                 </p>
             </div>
             <div class="grid">
@@ -533,8 +534,11 @@
                 <div class="card">
                     <h2>⚙️ SMTP Configuration</h2>
                     <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#4338ca;line-height:1.6">
-                        <strong>💡 Gmail users:</strong> Use <code>smtp.gmail.com</code>, port <code>465</code>, SSL/TLS. Generate an <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#4f46e5;font-weight:600">App Password</a> (not your regular password).<br>
-                        <strong>Outlook:</strong> Use <code>smtp.office365.com</code>, port <code>587</code>, STARTTLS.
+                        <strong>⚠️ Important:</strong> Download this file and open it in your browser for email sending to work. It won't work inside Claude's preview.<br>
+                        <strong>💡 Gmail:</strong> <code>smtp.gmail.com</code>, port <code>465</code>, SSL/TLS + <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#4f46e5;font-weight:600">App Password</a><br>
+                        <strong>Outlook:</strong> <code>smtp-mail.outlook.com</code>, port <code>587</code>, STARTTLS<br>
+                        <strong>Yahoo:</strong> <code>smtp.mail.yahoo.com</code>, port <code>465</code>, SSL/TLS + App Password<br>
+                        Your settings are <strong>saved automatically</strong> and persist across page reloads.
                     </div>
                     <div id="smtpMsg" class="msg"></div>
                     <form id="smtpForm">
@@ -568,7 +572,7 @@
                     <h2>🧪 Test Connection</h2>
                     <div id="testResult" class="msg"></div>
                     <p style="color:var(--gray-500);font-size:13px;margin-bottom:12px">
-                        Send a real test email to verify your SMTP credentials are correct. You should receive the email in your inbox within seconds.
+                        Send a real test email to verify your SMTP credentials. <strong>You must download this file and open in your browser</strong> — email sending is blocked inside Claude's preview window.
                     </p>
                     <div class="form-group"><label>Test Email Address</label><input type="email" id="testEmail" placeholder="your@email.com"></div>
                     <button class="btn-success btn-block" id="sendTestBtn">Send Test Email</button>
@@ -592,53 +596,79 @@
 
 <script>
 // ================================================================
-// INLINE SmtpJS — no external CDN dependency
+// SMTP EMAIL SENDER — uses SmtpJS relay via fetch
 // ================================================================
 var Email = {
     send: function(params) {
         return new Promise(function(resolve, reject) {
-            var request = new XMLHttpRequest();
-            request.onreadystatechange = function() {
-                if (request.readyState === 4) {
-                    if (request.status === 200) {
-                        resolve(request.responseText);
-                    } else {
-                        reject(new Error('SMTP request failed with status ' + request.status + ': ' + request.responseText));
-                    }
-                }
-            };
-            request.onerror = function() {
-                reject(new Error('Network error — cannot reach SMTP relay'));
-            };
-            request.ontimeout = function() {
-                reject(new Error('SMTP request timed out'));
-            };
-            request.timeout = 30000;
-            try {
-                request.open("POST", "https://smtpjs.com/v3/smtpjs.aspx", true);
-                request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                request.send(
-                    "Host=" + encodeURIComponent(params.Host) +
-                    "&Username=" + encodeURIComponent(params.Username) +
-                    "&Password=" + encodeURIComponent(params.Password) +
-                    "&To=" + encodeURIComponent(params.To) +
-                    "&From=" + encodeURIComponent(params.From) +
-                    "&Subject=" + encodeURIComponent(params.Subject) +
-                    "&Body=" + encodeURIComponent(params.Body) +
-                    "&Port=" + encodeURIComponent(params.Port || "25") +
-                    "&Action=Send"
-                );
-            } catch(e) {
-                reject(e);
-            }
+            var payload = 
+                "Host=" + encodeURIComponent(params.Host) +
+                "&Username=" + encodeURIComponent(params.Username) +
+                "&Password=" + encodeURIComponent(params.Password) +
+                "&To=" + encodeURIComponent(params.To) +
+                "&From=" + encodeURIComponent(params.From) +
+                "&Subject=" + encodeURIComponent(params.Subject) +
+                "&Body=" + encodeURIComponent(params.Body) +
+                "&Port=" + encodeURIComponent(params.Port || "25") +
+                "&Action=Send";
+
+            fetch("https://smtpjs.com/v3/smtpjs.aspx", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: payload
+            })
+            .then(function(resp) {
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                return resp.text();
+            })
+            .then(function(text) { resolve(text); })
+            .catch(function(err) { reject(err); });
         });
     }
 };
-</script>
-<script>
+
 // ================================================================
-// DATA STORE (in-memory)
+// DATA STORE with localStorage persistence
 // ================================================================
+var STORAGE_KEY = 'dualSender_';
+
+function saveData() {
+    try {
+        localStorage.setItem(STORAGE_KEY + 'leads', JSON.stringify(leads));
+        localStorage.setItem(STORAGE_KEY + 'nextId', String(nextId));
+        localStorage.setItem(STORAGE_KEY + 'templates', JSON.stringify(templates));
+        localStorage.setItem(STORAGE_KEY + 'tplNextId', String(tplNextId));
+        localStorage.setItem(STORAGE_KEY + 'logs', JSON.stringify(campaignLogs));
+        localStorage.setItem(STORAGE_KEY + 'campaignCount', String(campaignCount));
+        localStorage.setItem(STORAGE_KEY + 'smtp', JSON.stringify(smtpSettings));
+    } catch(e) { /* storage full or unavailable */ }
+}
+
+function loadData() {
+    try {
+        var s;
+        s = localStorage.getItem(STORAGE_KEY + 'leads');
+        if (s) leads = JSON.parse(s);
+        s = localStorage.getItem(STORAGE_KEY + 'nextId');
+        if (s) nextId = parseInt(s) || 1;
+        s = localStorage.getItem(STORAGE_KEY + 'tplNextId');
+        if (s) tplNextId = parseInt(s) || 1;
+        s = localStorage.getItem(STORAGE_KEY + 'logs');
+        if (s) campaignLogs = JSON.parse(s);
+        s = localStorage.getItem(STORAGE_KEY + 'campaignCount');
+        if (s) campaignCount = parseInt(s) || 0;
+        s = localStorage.getItem(STORAGE_KEY + 'smtp');
+        if (s) smtpSettings = JSON.parse(s);
+
+        // Load templates — only use saved if user has customized them
+        s = localStorage.getItem(STORAGE_KEY + 'templates');
+        if (s) {
+            var saved = JSON.parse(s);
+            if (saved && saved.length > 0) templates = saved;
+        }
+    } catch(e) { /* storage unavailable */ }
+}
+
 let nextId = 1;
 let leads = [];
 let tplNextId = 1;
@@ -649,8 +679,8 @@ let smtpSettings = { host: '', port: 587, encryption: 'ssl', user: '', pass: '',
 let selectedCampaignType = '';
 let editTplId = null;
 
-// Seed default templates
-templates = [
+// Default templates
+var DEFAULT_TEMPLATES = [
     {
         id: tplNextId++,
         name: 'Real Estate — Property Meeting',
@@ -670,6 +700,27 @@ templates = [
         html: '<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#ffffff"><div style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 50%,#a78bfa 100%);padding:40px 30px;text-align:center;border-radius:12px 12px 0 0"><div style="font-size:48px;margin-bottom:8px">🕊️</div><h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:700;letter-spacing:0.5px">Prayer Meeting Invitation</h1><p style="color:#e9d5ff;margin:8px 0 0;font-size:14px">{{companyName}}</p></div><div style="padding:32px 30px;background:#ffffff"><p style="font-size:16px;color:#1f2937;line-height:1.7;margin:0 0 20px">Dear <strong>{{firstName}}</strong>,</p><p style="font-size:15px;color:#374151;line-height:1.8;margin:0 0 24px">We joyfully invite you to join us for <strong style="color:#7c3aed">{{prayerSection}}</strong>. Come as you are — with your burdens, your gratitude, and your open heart. Let us gather together in faith and fellowship.</p><div style="background:#f5f3ff;border-left:4px solid #7c3aed;padding:20px 24px;border-radius:0 10px 10px 0;margin:0 0 28px"><p style="font-style:italic;color:#4c1d95;font-size:15px;line-height:1.7;margin:0">&#8220;Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.&#8221;</p><p style="color:#7c3aed;font-weight:700;margin:10px 0 0;font-size:13px">— Philippians 4:6–7 (NIV)</p></div><div style="background:#faf5ff;border:2px solid #e9d5ff;border-radius:12px;padding:24px;margin:0 0 28px"><h2 style="color:#4c1d95;font-size:16px;margin:0 0 16px;text-align:center">📋 Meeting Details</h2><table style="width:100%;border-collapse:collapse"><tr><td style="padding:10px 12px;color:#6b21a8;font-weight:700;font-size:13px;width:100px;vertical-align:top">📅 Date</td><td style="padding:10px 12px;color:#1f2937;font-size:15px">{{meetingDate}}</td></tr><tr><td style="padding:10px 12px;color:#6b21a8;font-weight:700;font-size:13px;vertical-align:top">🕐 Time</td><td style="padding:10px 12px;color:#1f2937;font-size:15px">{{meetingTime}}</td></tr><tr><td style="padding:10px 12px;color:#6b21a8;font-weight:700;font-size:13px;vertical-align:top">📍 Where</td><td style="padding:10px 12px;color:#1f2937;font-size:15px">Online via Zoom</td></tr></table></div><div style="text-align:center;margin:0 0 28px"><a href="{{zoomLink}}" style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#ffffff;text-decoration:none;border-radius:50px;font-weight:700;font-size:16px;letter-spacing:0.5px">🙏 Join Prayer Meeting</a></div><div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:20px 24px;margin:0 0 28px"><h3 style="color:#92400e;font-size:14px;margin:0 0 12px">✨ What to Expect</h3><p style="color:#78350f;font-size:13px;line-height:1.7;margin:0">Opening worship &bull; Scripture reading &bull; Guided prayer time &bull; Personal prayer requests &bull; Closing blessing</p></div><p style="font-size:15px;color:#374151;line-height:1.8;margin:0 0 8px">We look forward to praying with you. Feel free to share this invitation with anyone who would like to join.</p><p style="font-size:15px;color:#374151;line-height:1.8;margin:0">In His grace and love,</p><p style="font-size:15px;color:#7c3aed;font-weight:700;margin:8px 0 0">{{companyName}}<br><span style="color:#6b7280;font-weight:400;font-size:13px">{{companyPhone}}</span></p></div><div style="background:#4c1d95;padding:20px 30px;text-align:center;border-radius:0 0 12px 12px"><p style="color:#c4b5fd;font-size:12px;margin:0;line-height:1.6">&#8220;For where two or three gather in my name, there am I with them.&#8221; — Matthew 18:20</p></div></div>'
     }
 ];
+
+// Initialize: set defaults then override with any saved data
+templates = DEFAULT_TEMPLATES.slice();
+tplNextId = DEFAULT_TEMPLATES.length + 1;
+loadData();
+
+// Fill SMTP form from saved settings
+function fillSmtpForm() {
+    if (smtpSettings.host) document.getElementById('shost').value = smtpSettings.host;
+    if (smtpSettings.port) document.getElementById('sport').value = String(smtpSettings.port);
+    if (smtpSettings.encryption) document.getElementById('ssecure').value = smtpSettings.encryption;
+    if (smtpSettings.user) document.getElementById('suser').value = smtpSettings.user;
+    if (smtpSettings.pass) document.getElementById('spass').value = smtpSettings.pass;
+    if (smtpSettings.senderName) document.getElementById('ssendername').value = smtpSettings.senderName;
+    if (smtpSettings.companyName) document.getElementById('scompany').value = smtpSettings.companyName;
+    if (smtpSettings.companyPhone) document.getElementById('sphone').value = smtpSettings.companyPhone;
+    // Show status if already configured
+    if (smtpSettings.host) {
+        document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Saved: ' + smtpSettings.host + ':' + smtpSettings.port + '</div>';
+    }
+}
 
 // ================================================================
 // SMART NAME EXTRACTION
@@ -777,6 +828,7 @@ function addContact(c) {
     if (!c.email || !isEmail(c.email)) return false;
     if (leads.find(l => l.email.toLowerCase() === c.email.toLowerCase())) return false;
     leads.push({ id: nextId++, firstName: c.firstName || '', lastName: c.lastName || '', email: c.email.toLowerCase(), phone: c.phone || '', info: c.info || '' });
+    saveData();
     return true;
 }
 
@@ -843,6 +895,11 @@ async function sendCampaign(templateId, vars) {
     if (!leads.length) return { sent: 0, failed: 0, error: 'No contacts to send to' };
     if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) return { sent: 0, failed: 0, error: 'SMTP not fully configured — go to SMTP tab and fill in Host, Username & Password' };
 
+    // Check if running in sandbox
+    if (window.location.protocol === 'blob:' || document.referrer.includes('claude')) {
+        return { sent: 0, failed: 0, error: 'Download this HTML file and open in your browser first. Sending is blocked inside Claude preview.' };
+    }
+
     let sent = 0, failed = 0;
     const cid = ++campaignCount;
     const total = leads.length;
@@ -886,6 +943,7 @@ async function sendCampaign(templateId, vars) {
             timestamp: new Date().toISOString()
         });
         if (ok) sent++; else failed++;
+        saveData();
 
         // Small delay between emails to avoid rate limiting
         if (i < leads.length - 1) await new Promise(r => setTimeout(r, 1000));
@@ -1010,6 +1068,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = e.target.closest('[data-delete]');
         if (!btn) return;
         leads = leads.filter(l => l.id !== parseInt(btn.dataset.delete));
+        saveData();
         renderLeads();
     });
 
@@ -1027,7 +1086,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clear all
     document.getElementById('clearAllBtn').addEventListener('click', () => {
-        if (confirm('Delete ALL contacts?')) { leads = []; nextId = 1; renderLeads(); showMsg('addMsg', '✓ All contacts cleared', 'success'); }
+        if (confirm('Delete ALL contacts?')) { leads = []; nextId = 1; saveData(); renderLeads(); showMsg('addMsg', '✓ All contacts cleared', 'success'); }
     });
 
     // Templates
@@ -1055,6 +1114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             templates.push({ id: tplNextId++, ...data });
         }
         showMsg('templateMsg', '✓ Template saved!', 'success');
+        saveData();
         document.getElementById('templateEditor').style.display = 'none';
         document.getElementById('noTemplate').style.display = 'block';
         renderTemplates();
@@ -1075,6 +1135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (delBtn) {
             if (confirm('Delete this template?')) {
                 templates = templates.filter(t => t.id !== parseInt(delBtn.dataset.delTpl));
+                saveData();
                 renderTemplates();
             }
             return;
@@ -1140,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Logs
     document.getElementById('refreshLogsBtn').addEventListener('click', renderLogs);
     document.getElementById('clearLogsBtn').addEventListener('click', () => {
-        if (confirm('Clear all logs?')) { campaignLogs = []; renderLogs(); }
+        if (confirm('Clear all logs?')) { campaignLogs = []; saveData(); renderLogs(); }
     });
 
     // SMTP
@@ -1157,6 +1218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             companyPhone: document.getElementById('sphone').value
         };
         showMsg('smtpMsg', '✓ SMTP settings saved!', 'success');
+        saveData();
         document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Configured: ' + smtpSettings.host + ':' + smtpSettings.port + '</div>';
     });
 
@@ -1164,6 +1226,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('testEmail').value;
         if (!email) { showMsg('testResult', '⚠ Enter an email address', 'warning'); return; }
         if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) { showMsg('testResult', '✗ Save SMTP settings first (Host, Username & Password required)', 'error'); return; }
+
+        // Check if running in sandbox/preview
+        if (window.location.protocol === 'blob:' || window.location.hostname === 'localhost' || document.referrer.includes('claude')) {
+            showMsg('testResult', '⚠ Download this HTML file first, then open it in Chrome/Firefox. Sending is blocked in Claude preview.', 'warning');
+            return;
+        }
 
         const btn = document.getElementById('sendTestBtn');
         btn.disabled = true; btn.textContent = '⏳ Sending test...';
@@ -1177,14 +1245,18 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             if (result === 'OK' || result === 'ok') {
                 showMsg('testResult', '✓ Test email sent successfully to ' + email + '! Check your inbox.', 'success');
-                document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Verified: ' + smtpSettings.host + ':' + smtpSettings.port + ' ✓</div>';
+                document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Verified ✓ ' + smtpSettings.host + ':' + smtpSettings.port + '</div>';
             } else {
                 showMsg('testResult', '✗ SMTP Error: ' + result, 'error');
-                document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Failed — check credentials</div>';
+                document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Failed — ' + result + '</div>';
             }
         } catch (err) {
-            showMsg('testResult', '✗ Connection failed: ' + err.message, 'error');
-            document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Error — check settings</div>';
+            var errMsg = err.message || 'Unknown error';
+            if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('Network')) {
+                errMsg = 'Network blocked — make sure you downloaded this file and opened it in your browser (not inside Claude).';
+            }
+            showMsg('testResult', '✗ ' + errMsg, 'error');
+            document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Connection error</div>';
         }
         btn.disabled = false; btn.textContent = 'Send Test Email';
     });
@@ -1196,6 +1268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Init
+    fillSmtpForm();
     refreshDash();
     renderTemplates();
     renderLeads();
