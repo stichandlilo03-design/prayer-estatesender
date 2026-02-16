@@ -356,7 +356,7 @@
                 <h2>🎯 Quick Start</h2>
                 <p style="color:var(--gray-500);line-height:1.7;font-size:14px">
                     This standalone dashboard supports <strong>two campaign types</strong>: Real Estate Property Meetings and Church Prayer Zoom Invitations.
-                    Add contacts, choose a template, fill in details, and send. All data is stored locally in this page session.
+                    Add contacts, choose a template, fill in details, and send <strong>real emails</strong> via your SMTP server. Configure SMTP first, then test before sending campaigns.
                 </p>
             </div>
             <div class="grid">
@@ -532,6 +532,10 @@
             <div class="grid">
                 <div class="card">
                     <h2>⚙️ SMTP Configuration</h2>
+                    <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#4338ca;line-height:1.6">
+                        <strong>💡 Gmail users:</strong> Use <code>smtp.gmail.com</code>, port <code>465</code>, SSL/TLS. Generate an <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#4f46e5;font-weight:600">App Password</a> (not your regular password).<br>
+                        <strong>Outlook:</strong> Use <code>smtp.office365.com</code>, port <code>587</code>, STARTTLS.
+                    </div>
                     <div id="smtpMsg" class="msg"></div>
                     <form id="smtpForm">
                         <div class="form-group"><label>SMTP Host *</label><input type="text" id="shost" required placeholder="smtp.gmail.com"></div>
@@ -564,7 +568,7 @@
                     <h2>🧪 Test Connection</h2>
                     <div id="testResult" class="msg"></div>
                     <p style="color:var(--gray-500);font-size:13px;margin-bottom:12px">
-                        This standalone version simulates sending. In production, connect a real SMTP backend.
+                        Send a real test email to verify your SMTP credentials are correct. You should receive the email in your inbox within seconds.
                     </p>
                     <div class="form-group"><label>Test Email Address</label><input type="email" id="testEmail" placeholder="your@email.com"></div>
                     <button class="btn-success btn-block" id="sendTestBtn">Send Test Email</button>
@@ -586,6 +590,7 @@
     </div>
 </div>
 
+<script src="https://smtpjs.com/v3/smtp.js"></script>
 <script>
 // ================================================================
 // DATA STORE (in-memory)
@@ -613,6 +618,12 @@ templates = [
         name: 'Church — Prayer Meeting Zoom',
         subject: "You're Invited: {{prayerSection}} 🙏",
         html: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px"><h2 style="color:#7c3aed">⛪ Prayer Meeting Invitation</h2><p>Dear <strong>{{firstName}}</strong>,</p><p>You are warmly invited to join us for <strong>{{prayerSection}}</strong>.</p><div style="background:#f5f3ff;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #7c3aed"><p style="margin:0"><strong>📅 Date:</strong> {{meetingDate}}</p><p style="margin:6px 0 0"><strong>🕐 Time:</strong> {{meetingTime}}</p></div><p style="font-style:italic;color:#666;margin:16px 0">"For where two or three gather in my name, there am I with them." — Matthew 18:20</p><p><a href="{{zoomLink}}" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold">Join Prayer Meeting on Zoom</a></p><p style="color:#666;margin-top:20px">In His service,<br>{{companyName}}<br>{{companyPhone}}</p></div>'
+    },
+    {
+        id: tplNextId++,
+        name: 'Prayer — Premium Dove Design',
+        subject: '🕊️ You\'re Invited: {{prayerSection}} | {{companyName}}',
+        html: '<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#ffffff"><div style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 50%,#a78bfa 100%);padding:40px 30px;text-align:center;border-radius:12px 12px 0 0"><div style="font-size:48px;margin-bottom:8px">🕊️</div><h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:700;letter-spacing:0.5px">Prayer Meeting Invitation</h1><p style="color:#e9d5ff;margin:8px 0 0;font-size:14px">{{companyName}}</p></div><div style="padding:32px 30px;background:#ffffff"><p style="font-size:16px;color:#1f2937;line-height:1.7;margin:0 0 20px">Dear <strong>{{firstName}}</strong>,</p><p style="font-size:15px;color:#374151;line-height:1.8;margin:0 0 24px">We joyfully invite you to join us for <strong style="color:#7c3aed">{{prayerSection}}</strong>. Come as you are — with your burdens, your gratitude, and your open heart. Let us gather together in faith and fellowship.</p><div style="background:#f5f3ff;border-left:4px solid #7c3aed;padding:20px 24px;border-radius:0 10px 10px 0;margin:0 0 28px"><p style="font-style:italic;color:#4c1d95;font-size:15px;line-height:1.7;margin:0">&#8220;Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.&#8221;</p><p style="color:#7c3aed;font-weight:700;margin:10px 0 0;font-size:13px">— Philippians 4:6–7 (NIV)</p></div><div style="background:#faf5ff;border:2px solid #e9d5ff;border-radius:12px;padding:24px;margin:0 0 28px"><h2 style="color:#4c1d95;font-size:16px;margin:0 0 16px;text-align:center">📋 Meeting Details</h2><table style="width:100%;border-collapse:collapse"><tr><td style="padding:10px 12px;color:#6b21a8;font-weight:700;font-size:13px;width:100px;vertical-align:top">📅 Date</td><td style="padding:10px 12px;color:#1f2937;font-size:15px">{{meetingDate}}</td></tr><tr><td style="padding:10px 12px;color:#6b21a8;font-weight:700;font-size:13px;vertical-align:top">🕐 Time</td><td style="padding:10px 12px;color:#1f2937;font-size:15px">{{meetingTime}}</td></tr><tr><td style="padding:10px 12px;color:#6b21a8;font-weight:700;font-size:13px;vertical-align:top">📍 Where</td><td style="padding:10px 12px;color:#1f2937;font-size:15px">Online via Zoom</td></tr></table></div><div style="text-align:center;margin:0 0 28px"><a href="{{zoomLink}}" style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#ffffff;text-decoration:none;border-radius:50px;font-weight:700;font-size:16px;letter-spacing:0.5px">🙏 Join Prayer Meeting</a></div><div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:20px 24px;margin:0 0 28px"><h3 style="color:#92400e;font-size:14px;margin:0 0 12px">✨ What to Expect</h3><p style="color:#78350f;font-size:13px;line-height:1.7;margin:0">Opening worship &bull; Scripture reading &bull; Guided prayer time &bull; Personal prayer requests &bull; Closing blessing</p></div><p style="font-size:15px;color:#374151;line-height:1.8;margin:0 0 8px">We look forward to praying with you. Feel free to share this invitation with anyone who would like to join.</p><p style="font-size:15px;color:#374151;line-height:1.8;margin:0">In His grace and love,</p><p style="font-size:15px;color:#7c3aed;font-weight:700;margin:8px 0 0">{{companyName}}<br><span style="color:#6b7280;font-weight:400;font-size:13px">{{companyPhone}}</span></p></div><div style="background:#4c1d95;padding:20px 30px;text-align:center;border-radius:0 0 12px 12px"><p style="color:#c4b5fd;font-size:12px;margin:0;line-height:1.6">&#8220;For where two or three gather in my name, there am I with them.&#8221; — Matthew 18:20</p></div></div>'
     }
 ];
 
@@ -762,30 +773,83 @@ function renderTemplates() {
 }
 
 // ================================================================
-// CAMPAIGNS — simulate sending
+// CAMPAIGNS — REAL SMTP SENDING via SmtpJS
 // ================================================================
-function simulateSend(templateId, vars) {
+async function realSendEmail(to, subject, htmlBody) {
+    if (typeof Email === 'undefined') {
+        throw new Error('SmtpJS not loaded — check internet connection');
+    }
+    const result = await Email.send({
+        Host: smtpSettings.host,
+        Username: smtpSettings.user,
+        Password: smtpSettings.pass,
+        To: to,
+        From: smtpSettings.user,
+        Subject: subject,
+        Body: htmlBody,
+        Port: smtpSettings.port,
+        Security: smtpSettings.encryption === 'ssl' ? 'SSL' : (smtpSettings.encryption === 'starttls' ? 'TLS' : undefined)
+    });
+    return result;
+}
+
+async function sendCampaign(templateId, vars) {
     const tpl = templates.find(t => t.id === parseInt(templateId));
     if (!tpl) return { sent: 0, failed: 0, error: 'Template not found' };
     if (!leads.length) return { sent: 0, failed: 0, error: 'No contacts to send to' };
-    if (!smtpSettings.host) return { sent: 0, failed: 0, error: 'SMTP not configured — go to SMTP tab first' };
+    if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) return { sent: 0, failed: 0, error: 'SMTP not fully configured — go to SMTP tab and fill in Host, Username & Password' };
 
     let sent = 0, failed = 0;
     const cid = ++campaignCount;
-    for (const lead of leads) {
-        const v = { ...vars, firstName: lead.firstName, lastName: lead.lastName, email: lead.email, companyName: smtpSettings.companyName, companyPhone: smtpSettings.companyPhone };
-        const ok = Math.random() > 0.1;
+    const total = leads.length;
+    const statusEl = document.getElementById('campaignStatus');
+    const detailsEl = document.getElementById('campaignDetails');
+
+    // Disable send button during sending
+    const sendBtn = document.querySelector('#campaignForm button[type="submit"]');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending...'; }
+
+    for (let i = 0; i < leads.length; i++) {
+        const lead = leads[i];
+        const v = { ...vars, firstName: lead.firstName, lastName: lead.lastName, email: lead.email, companyName: smtpSettings.companyName || smtpSettings.senderName, companyPhone: smtpSettings.companyPhone };
+        const subject = replaceVars(tpl.subject, v);
+        const body = replaceVars(tpl.html, v);
+
+        statusEl.textContent = '⏳ Sending ' + (i + 1) + ' of ' + total + '...';
+        detailsEl.textContent = 'Current: ' + lead.email;
+
+        let ok = false;
+        let msg = '';
+        try {
+            const result = await realSendEmail(lead.email, subject, body);
+            if (result === 'OK' || result === 'ok') {
+                ok = true;
+                msg = 'Delivered successfully';
+            } else {
+                msg = result || 'Unknown error';
+            }
+        } catch (err) {
+            msg = err.message || 'Send failed';
+        }
+
         campaignLogs.push({
             campaignId: cid,
             leadName: (lead.firstName + ' ' + lead.lastName).trim() || lead.email,
             leadEmail: lead.email,
-            subject: replaceVars(tpl.subject, v),
+            subject: subject,
             status: ok ? 'success' : 'failed',
-            message: ok ? 'Delivered' : 'SMTP timeout (simulated)',
+            message: msg,
             timestamp: new Date().toISOString()
         });
         if (ok) sent++; else failed++;
+
+        // Small delay between emails to avoid rate limiting
+        if (i < leads.length - 1) await new Promise(r => setTimeout(r, 1000));
     }
+
+    // Re-enable send button
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Campaign to All Contacts'; }
+
     return { sent, failed, success: true };
 }
 
@@ -798,7 +862,8 @@ function renderLogs() {
     el.innerHTML = [...campaignLogs].reverse().map(l => '<div class="log-entry ' + (l.status === 'success' ? 'log-success' : 'log-error') + '">' +
         '<strong>' + l.leadName + '</strong> &lt;' + l.leadEmail + '&gt;' +
         '<span class="badge ' + (l.status === 'success' ? 'badge-success' : 'badge-danger') + '" style="margin-left:8px">' + l.status + '</span><br>' +
-        '<small style="color:var(--gray-500)">' + l.subject + ' — ' + new Date(l.timestamp).toLocaleString() + '</small>' +
+        '<small style="color:var(--gray-500)">' + l.subject + '</small><br>' +
+        '<small style="color:' + (l.status === 'success' ? '#166534' : '#991b1b') + '">' + (l.message || '') + ' — ' + new Date(l.timestamp).toLocaleString() + '</small>' +
     '</div>').join('');
 }
 
@@ -995,8 +1060,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Send campaign
-    document.getElementById('campaignForm').addEventListener('submit', e => {
+    // Send campaign (real SMTP)
+    document.getElementById('campaignForm').addEventListener('submit', async e => {
         e.preventDefault();
         if (!selectedCampaignType) { showMsg('campaignMsg', '⚠ Select a template type first', 'warning'); return; }
         const tplId = document.getElementById('campaignTemplateSelect').value;
@@ -1010,12 +1075,15 @@ document.addEventListener('DOMContentLoaded', () => {
             propertyPrice: document.getElementById('propPrice')?.value || '',
             prayerSection: document.getElementById('prayerSection')?.value || ''
         };
-        const result = simulateSend(tplId, vars);
+
+        showMsg('campaignMsg', '⏳ Sending campaign... please wait', 'warning');
+        const result = await sendCampaign(tplId, vars);
+
         if (result.error && !result.success) {
             showMsg('campaignMsg', '✗ ' + result.error, 'error');
         } else {
-            showMsg('campaignMsg', '✓ Campaign sent! ' + result.sent + ' delivered, ' + result.failed + ' failed', 'success');
-            document.getElementById('campaignStatus').textContent = '✓ Last campaign sent successfully!';
+            showMsg('campaignMsg', '✓ Campaign complete! ' + result.sent + ' delivered, ' + result.failed + ' failed', result.failed === 0 ? 'success' : 'warning');
+            document.getElementById('campaignStatus').textContent = '✓ Campaign finished!';
             document.getElementById('campaignDetails').textContent = 'Delivered: ' + result.sent + ' | Failed: ' + result.failed + ' | ' + new Date().toLocaleString();
             document.getElementById('campaignForm').reset();
             document.querySelectorAll('.template-option[data-tpl]').forEach(o => o.classList.remove('selected'));
@@ -1048,11 +1116,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Configured: ' + smtpSettings.host + ':' + smtpSettings.port + '</div>';
     });
 
-    document.getElementById('sendTestBtn').addEventListener('click', () => {
+    document.getElementById('sendTestBtn').addEventListener('click', async () => {
         const email = document.getElementById('testEmail').value;
         if (!email) { showMsg('testResult', '⚠ Enter an email address', 'warning'); return; }
-        if (!smtpSettings.host) { showMsg('testResult', '✗ Save SMTP settings first', 'error'); return; }
-        showMsg('testResult', '✓ Test email simulated to ' + email + ' via ' + smtpSettings.host, 'success');
+        if (!smtpSettings.host || !smtpSettings.user || !smtpSettings.pass) { showMsg('testResult', '✗ Save SMTP settings first (Host, Username & Password required)', 'error'); return; }
+
+        const btn = document.getElementById('sendTestBtn');
+        btn.disabled = true; btn.textContent = '⏳ Sending test...';
+        showMsg('testResult', '⏳ Connecting to ' + smtpSettings.host + '...', 'warning');
+
+        try {
+            const result = await realSendEmail(
+                email,
+                '✅ Dual Sender — SMTP Test Successful!',
+                '<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:30px"><h2 style="color:#4f46e5">✅ SMTP Test Successful</h2><p>This confirms your SMTP settings are working correctly.</p><p><strong>Host:</strong> ' + smtpSettings.host + '<br><strong>Port:</strong> ' + smtpSettings.port + '<br><strong>Encryption:</strong> ' + smtpSettings.encryption + '</p><p style="color:#666;margin-top:20px">Sent from Dual Sender Dashboard</p></div>'
+            );
+            if (result === 'OK' || result === 'ok') {
+                showMsg('testResult', '✓ Test email sent successfully to ' + email + '! Check your inbox.', 'success');
+                document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Verified: ' + smtpSettings.host + ':' + smtpSettings.port + ' ✓</div>';
+            } else {
+                showMsg('testResult', '✗ SMTP Error: ' + result, 'error');
+                document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Failed — check credentials</div>';
+            }
+        } catch (err) {
+            showMsg('testResult', '✗ Connection failed: ' + err.message, 'error');
+            document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-off"><div class="smtp-dot"></div>Error — check settings</div>';
+        }
+        btn.disabled = false; btn.textContent = 'Send Test Email';
     });
 
     // Modal
