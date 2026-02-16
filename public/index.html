@@ -1,168 +1,432 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dual Sender - Real Estate & Prayer Meetings v1.0</title>
+    <title>Dual Sender — Real Estate & Prayer Meetings</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #667eea; min-height: 100vh; padding: 15px; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        header { background: #fff; padding: 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
-        h1 { color: #333; font-size: 28px; margin-bottom: 8px; }
-        h2 { color: #333; margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
-        .subtitle { color: #666; font-size: 14px; }
-        .tabs { display: flex; gap: 10px; margin-top: 15px; border-bottom: 2px solid #eee; flex-wrap: wrap; }
-        .tab-btn { padding: 10px 20px; background: 0; border: 0; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 600; color: #999; font-size: 14px; }
-        .tab-btn:hover { color: #667eea; }
-        .tab-btn.active { color: #667eea; border-bottom-color: #667eea; }
-        .tab-content { display: none; }
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --primary-bg: #eef2ff;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --warning: #ca8a04;
+            --warning-bg: #fef9c3;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius: 10px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+            --shadow: 0 4px 16px rgba(0,0,0,.08);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #312e81 0%, #4f46e5 40%, #7c3aed 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--gray-800);
+        }
+        .container { max-width: 1140px; margin: 0 auto; }
+
+        /* HEADER */
+        header {
+            background: #fff;
+            padding: 24px 28px 0;
+            border-radius: var(--radius) var(--radius) 0 0;
+            box-shadow: var(--shadow);
+        }
+        .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+        .logo {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #fff; flex-shrink: 0;
+        }
+        h1 { font-size: 22px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
+        .subtitle { color: var(--gray-500); font-size: 13px; margin-bottom: 16px; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 2px; overflow-x: auto; }
+        .tab-btn {
+            padding: 11px 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-400);
+            font-size: 13px;
+            border-bottom: 2.5px solid transparent;
+            transition: all .2s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .tab-btn:hover { color: var(--primary-light); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* MAIN CONTENT AREA */
+        .main {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: 0 0 var(--radius) var(--radius);
+            box-shadow: var(--shadow);
+            min-height: 500px;
+        }
+        .tab-content { display: none; animation: fadeIn .25s ease; }
         .tab-content.active { display: block; }
-        .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .card {
+            background: #fff;
+            padding: 22px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+        .card + .card { margin-top: 16px; }
+        .card h2 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-bg);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+        /* FORMS */
         .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: 600; color: #333; margin-bottom: 4px; font-size: 13px; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
-        input:focus, textarea:focus, select:focus { outline: 0; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.1); }
-        button { padding: 10px 20px; background: #667eea; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all .3s; }
-        button:hover { background: #5568d3; }
-        .btn-danger { background: #dc3545; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-success { background: #28a745; }
-        .btn-success:hover { background: #218838; }
-        .btn-small { padding: 6px 12px; font-size: 12px; min-width: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th { background: #667eea; color: #fff; padding: 10px; text-align: left; font-weight: 600; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-        tr:hover { background: #f9f9f9; }
-        .msg { padding: 12px; border-radius: 6px; margin-bottom: 10px; display: none; font-size: 13px; }
-        .msg-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .msg-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .msg-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
-        .loading { display: none; text-align: center; color: #667eea; padding: 10px; font-size: 13px; }
-        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        .stat { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-num { font-size: 24px; font-weight: bold; }
-        .stat-label { font-size: 12px; margin-top: 5px; }
-        .overflow-x { overflow-x: auto; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.7); z-index: 1000; }
-        .modal.active { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: #fff; border-radius: 10px; padding: 25px; max-width: 600px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-close { background: 0; border: 0; font-size: 28px; cursor: pointer; color: #999; padding: 0; box-shadow: none; }
-        .tabs-inner { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #ddd; }
-        .tab-inner { padding: 8px 15px; background: 0; border: 0; cursor: pointer; border-bottom: 2px solid transparent; color: #666; font-weight: 600; font-size: 13px; }
-        .tab-inner:hover { color: #667eea; }
-        .tab-inner.active { color: #667eea; border-bottom-color: #667eea; }
+        label { display: block; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; font-size: 12.5px; }
+        input, textarea, select {
+            width: 100%; padding: 9px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px; font-size: 13.5px;
+            font-family: inherit; background: #fff;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+        }
+        textarea { min-height: 110px; resize: vertical; font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace; font-size: 12.5px; }
+
+        /* BUTTONS */
+        button, .btn {
+            padding: 9px 18px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all .2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        button:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,.25); }
+        button:active { transform: translateY(0); }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #15803d; box-shadow: 0 4px 12px rgba(22,163,74,.25); }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #b91c1c; box-shadow: 0 4px 12px rgba(220,38,38,.25); }
+        .btn-ghost { background: transparent; color: var(--gray-500); border: 1.5px solid var(--gray-200); }
+        .btn-ghost:hover { background: var(--gray-100); color: var(--gray-700); box-shadow: none; transform: none; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        /* TABLE */
+        .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--gray-200); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--gray-800); color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: var(--primary-bg); }
+
+        /* MESSAGES */
+        .msg { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; display: none; font-size: 13px; font-weight: 500; }
+        .msg-success { background: var(--success-bg); color: #166534; }
+        .msg-error { background: var(--danger-bg); color: #991b1b; }
+        .msg-warning { background: var(--warning-bg); color: #854d0e; }
+
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+        @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+        .stat {
+            background: #fff;
+            padding: 18px;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary) 0%, #7c3aed 100%);
+        }
+        .stat-num { font-size: 28px; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 11.5px; color: var(--gray-500); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+        /* TEMPLATE SELECTOR */
+        .template-selector { background: var(--primary-bg); padding: 18px; border-radius: var(--radius); margin-bottom: 18px; border: 1.5px solid rgba(79,70,229,.15); }
+        .template-selector h3 { color: var(--primary-dark); font-size: 14px; margin-bottom: 12px; }
+        .template-option {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            background: #fff;
+        }
+        .template-option:last-child { margin-bottom: 0; }
+        .template-option:hover { border-color: var(--primary-light); background: #fff; }
+        .template-option.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+        .template-option.selected p { color: rgba(255,255,255,.8) !important; }
+        .template-option strong { font-size: 14px; }
+        .template-option p { font-size: 12px; margin-top: 4px; color: var(--gray-500); }
+
+        /* IMPORT TABS */
+        .tabs-inner { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 1.5px solid var(--gray-200); }
+        .tab-inner {
+            padding: 8px 14px;
+            background: transparent; border: none;
+            cursor: pointer; font-weight: 600;
+            color: var(--gray-400); font-size: 12.5px;
+            border-bottom: 2px solid transparent;
+            font-family: inherit; transition: all .2s;
+        }
+        .tab-inner:hover { color: var(--primary-light); }
+        .tab-inner.active { color: var(--primary); border-bottom-color: var(--primary); }
         .tab-inner-content { display: none; }
         .tab-inner-content.active { display: block; }
-        .file-upload { border: 2px dashed #667eea; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; background: #f8f9ff; }
+
+        /* FILE UPLOAD */
+        .file-upload {
+            border: 2px dashed var(--primary-light);
+            padding: 28px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            background: var(--primary-bg);
+            transition: all .2s;
+        }
+        .file-upload:hover { background: #e0e7ff; border-color: var(--primary); }
         .file-upload input { display: none; }
-        textarea { min-height: 100px; resize: vertical; font-family: 'Courier New', monospace; }
-        .template-selector { background: #f8f9ff; border: 2px solid #667eea; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        .template-selector h3 { color: #667eea; margin-bottom: 10px; }
-        .template-option { padding: 10px; margin-bottom: 8px; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all .3s; }
-        .template-option:hover { border-color: #667eea; background: #f8f9ff; }
-        .template-option.selected { border-color: #667eea; background: #667eea; color: white; }
+
+        /* LOG ENTRY */
+        .log-entry {
+            padding: 10px 14px;
+            border-left: 4px solid;
+            margin-bottom: 8px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+        }
+        .log-success { border-color: var(--success); background: var(--success-bg); }
+        .log-error { border-color: var(--danger); background: var(--danger-bg); }
+
+        /* MODAL */
+        .modal-bg {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+        }
+        .modal-bg.active { display: flex; align-items: center; justify-content: center; }
+        .modal-box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px;
+            max-width: 620px;
+            width: 92%;
+            box-shadow: var(--shadow-lg);
+            animation: modalIn .2s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .modal-close {
+            background: var(--gray-100); border: none;
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; cursor: pointer; color: var(--gray-500);
+            padding: 0;
+        }
+        .modal-close:hover { background: var(--gray-200); color: var(--gray-700); box-shadow: none; transform: none; }
+
+        /* HINTS */
+        .hint { font-size: 11.5px; color: var(--gray-400); margin-top: 5px; }
+        .hint strong { color: var(--gray-500); }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-success { background: var(--success-bg); color: #166534; }
+        .badge-danger { background: var(--danger-bg); color: #991b1b; }
+
+        .empty-state {
+            text-align: center;
+            color: var(--gray-400);
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+        .empty-state span { font-size: 36px; display: block; margin-bottom: 10px; }
+
+        .qs-card {
+            background: #fff;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all .2s;
+        }
+        .qs-card:hover { border-color: var(--primary-light); box-shadow: 0 6px 20px rgba(79,70,229,.1); }
+        .qs-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+        .qs-card h3 { font-size: 15px; color: var(--gray-800); margin-bottom: 6px; }
+        .qs-card p { font-size: 13px; color: var(--gray-500); line-height: 1.5; }
+
+        .preview-html { border: 1px solid var(--gray-200); border-radius: 8px; padding: 16px; max-height: 400px; overflow-y: auto; background: var(--gray-50); }
+
+        .smtp-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+        .smtp-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .smtp-on { background: var(--success-bg); color: #166534; }
+        .smtp-on .smtp-dot { background: var(--success); }
+        .smtp-off { background: var(--gray-100); color: var(--gray-500); }
+        .smtp-off .smtp-dot { background: var(--gray-400); }
+
+        .section-label { font-size: 14px; font-weight: 700; color: var(--gray-700); margin: 18px 0 12px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🔄 Dual Sender - Real Estate & Prayer Meetings</h1>
-            <p class="subtitle">Send property meetings OR prayer zoom invitations from one dashboard</p>
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-btn" onclick="switchTab('leads')">👥 Contacts</button>
-                <button class="tab-btn" onclick="switchTab('templates')">📝 Templates</button>
-                <button class="tab-btn" onclick="switchTab('campaigns')">🚀 Send Campaign</button>
-                <button class="tab-btn" onclick="switchTab('logs')">📋 Logs</button>
-                <button class="tab-btn" onclick="switchTab('smtp')">⚙️ SMTP</button>
+<div class="container">
+    <header>
+        <div class="header-top">
+            <div class="logo">📨</div>
+            <div>
+                <h1>Dual Sender</h1>
+                <p class="subtitle">Send property meetings or prayer Zoom invitations from one dashboard</p>
             </div>
-        </header>
+        </div>
+        <div class="tabs" id="mainTabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="contacts">👥 Contacts</button>
+            <button class="tab-btn" data-tab="templates">📝 Templates</button>
+            <button class="tab-btn" data-tab="campaigns">🚀 Send</button>
+            <button class="tab-btn" data-tab="logs">📋 Logs</button>
+            <button class="tab-btn" data-tab="smtp">⚙️ SMTP</button>
+        </div>
+    </header>
 
+    <div class="main">
         <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active">
             <div class="stats">
-                <div class="stat"><div class="stat-num" id="dashContacts">0</div><div class="stat-label">Contacts</div></div>
-                <div class="stat"><div class="stat-num" id="dashTemplates">0</div><div class="stat-label">Templates</div></div>
-                <div class="stat"><div class="stat-num" id="dashCampaigns">0</div><div class="stat-label">Campaigns</div></div>
-                <div class="stat"><div class="stat-num" id="dashEmails">0</div><div class="stat-label">Emails Sent</div></div>
+                <div class="stat"><div class="stat-num" id="dContacts">0</div><div class="stat-label">Contacts</div></div>
+                <div class="stat"><div class="stat-num" id="dTemplates">0</div><div class="stat-label">Templates</div></div>
+                <div class="stat"><div class="stat-num" id="dCampaigns">0</div><div class="stat-label">Campaigns</div></div>
+                <div class="stat"><div class="stat-num" id="dEmails">0</div><div class="stat-label">Emails Sent</div></div>
             </div>
-            <div class="card">
+            <div class="card" style="margin-bottom:16px">
                 <h2>🎯 Quick Start</h2>
-                <p style="color:#666;line-height:1.6">This system supports TWO templates: Real Estate Property Meetings and Church Prayer Zoom Invitations. Choose which type you want to send, add your contacts, and launch campaigns!</p>
+                <p style="color:var(--gray-500);line-height:1.7;font-size:14px">
+                    This standalone dashboard supports <strong>two campaign types</strong>: Real Estate Property Meetings and Church Prayer Zoom Invitations.
+                    Add contacts, choose a template, fill in details, and send. All data is stored locally in this page session.
+                </p>
             </div>
             <div class="grid">
-                <div class="card">
-                    <h2>🏘️ Real Estate Sender</h2>
-                    <p style="color:#666;font-size:14px">Send property meeting invitations to property owners with Zoom links, meeting details, and property info.</p>
+                <div class="qs-card">
+                    <span class="qs-icon">🏘️</span>
+                    <h3>Real Estate Sender</h3>
+                    <p>Send property meeting invitations with Zoom links, meeting details, and property info to prospective buyers.</p>
                 </div>
-                <div class="card">
-                    <h2>⛪ Prayer Meeting Sender</h2>
-                    <p style="color:#666;font-size:14px">Send church prayer meeting Zoom invitations to church members with prayer focus, Scripture verse, and meeting details.</p>
+                <div class="qs-card">
+                    <span class="qs-icon">⛪</span>
+                    <h3>Prayer Meeting Sender</h3>
+                    <p>Send prayer meeting Zoom invitations with prayer focus, Scripture verse, and meeting details to church members.</p>
                 </div>
             </div>
         </div>
 
-        <!-- LEADS / CONTACTS -->
-        <div id="leads" class="tab-content">
+        <!-- CONTACTS -->
+        <div id="contacts" class="tab-content">
             <div class="grid">
                 <div class="card">
                     <h2>➕ Add Contact</h2>
                     <div id="addMsg" class="msg"></div>
-                    <form id="addForm" onsubmit="addLead(event)">
+                    <form id="addForm">
                         <div class="form-group"><label>First Name</label><input type="text" id="fn"></div>
                         <div class="form-group"><label>Last Name</label><input type="text" id="ln"></div>
                         <div class="form-group"><label>Email *</label><input type="email" id="em" required></div>
                         <div class="form-group"><label>Phone</label><input type="text" id="ph"></div>
-                        <div class="form-group"><label>Property/Church Info</label><input type="text" id="ad" placeholder="(optional)"></div>
-                        <button type="submit" class="btn-success" style="width:100%">Add Contact</button>
+                        <div class="form-group"><label>Property / Church Info</label><input type="text" id="ad" placeholder="(optional)"></div>
+                        <button type="submit" class="btn-success btn-block">Add Contact</button>
                     </form>
                 </div>
-
                 <div class="card">
                     <h2>📤 Import Contacts</h2>
                     <div id="uploadMsg" class="msg"></div>
                     <div class="tabs-inner">
-                        <button class="tab-inner active" onclick="switchImportTab('paste')">Paste</button>
-                        <button class="tab-inner" onclick="switchImportTab('upload')">Upload</button>
+                        <button class="tab-inner active" data-import="paste">Paste</button>
+                        <button class="tab-inner" data-import="upload">Upload</button>
                     </div>
-                    <div id="paste" class="tab-inner-content active">
+                    <div id="importPaste" class="tab-inner-content active">
                         <div class="form-group" style="margin-bottom:0">
-                            <label>Paste emails or CSV data:</label>
-                            <textarea id="pasteArea" placeholder="Paste one email per line:&#10;stevenkilan@gmail.com&#10;john.doe@yahoo.com&#10;mary_smith@outlook.com&#10;&#10;Or full CSV:&#10;First Name,Last Name,Email,Phone"></textarea>
-                            <p style="font-size:11px;color:#888;margin-top:5px">💡 <strong>Smart detect:</strong> Paste just emails (one per line) and names are auto-extracted. e.g. <em>stevenkilan@gmail.com</em> → First Name: <em>Steven</em>, Last Name: <em>Kilan</em></p>
-                            <button type="button" class="btn-success" onclick="pasteLead()" style="width:100%;margin-top:10px">Paste & Import</button>
+                            <label>Paste emails or CSV data</label>
+                            <textarea id="pasteArea" placeholder="One email per line:&#10;stevenkilan@gmail.com&#10;john.doe@yahoo.com&#10;&#10;Or CSV:&#10;First Name,Last Name,Email,Phone"></textarea>
+                            <p class="hint">💡 <strong>Smart detect:</strong> Names auto-extracted from emails — e.g. <em>stevenkilan@gmail.com</em> → Steven Kilan</p>
+                            <button type="button" class="btn-success btn-block" style="margin-top:10px" id="pasteBtn">Paste &amp; Import</button>
                         </div>
                     </div>
-                    <div id="upload" class="tab-inner-content">
-                        <div class="file-upload" onclick="document.getElementById('file').click()">
-                            <input type="file" id="file" accept=".csv,.xlsx,.xls,.txt" onchange="uploadFile(event)">
-                            <p style="color:#667eea;font-weight:600">📁 Click to upload CSV/Excel/TXT</p>
-                            <p style="font-size:11px;color:#888;margin-top:5px">💡 TXT files with one email per line are supported — names auto-extracted</p>
+                    <div id="importUpload" class="tab-inner-content">
+                        <div class="file-upload" id="fileDropZone">
+                            <input type="file" id="fileInput" accept=".csv,.txt">
+                            <p style="color:var(--primary);font-weight:600;font-size:14px">📁 Click to upload CSV or TXT</p>
+                            <p class="hint">TXT with one email per line supported — names auto-extracted</p>
                         </div>
                     </div>
-                    <div class="loading" id="importLoading">⏳ Processing...</div>
-                    <div id="importStats" style="display:none;margin-top:10px">
-                        <div style="padding:10px;background:#d4edda;border-radius:6px;margin-bottom:8px;color:#155724;font-size:13px">✓ Added: <strong id="addedCount">0</strong></div>
-                        <div style="padding:10px;background:#fff3cd;border-radius:6px;color:#856404;font-size:13px">⚠ Failed/Skipped: <strong id="failedCount">0</strong></div>
+                    <div id="importStats" style="display:none;margin-top:12px">
+                        <div style="padding:10px;background:var(--success-bg);border-radius:8px;margin-bottom:6px;color:#166534;font-size:13px">✓ Added: <strong id="addedCount">0</strong></div>
+                        <div style="padding:10px;background:var(--warning-bg);border-radius:8px;color:#854d0e;font-size:13px">⚠ Skipped: <strong id="failedCount">0</strong></div>
                     </div>
                 </div>
             </div>
-
-            <div class="card">
+            <div class="card" style="margin-top:16px">
                 <h2>📋 All Contacts</h2>
-                <div style="margin-bottom:10px">
-                    <input type="text" id="searchLead" placeholder="Search..." style="max-width:300px" oninput="renderLeads()">
-                    <button class="btn-small" onclick="exportLeads()" style="margin-left:5px">📥 Export</button>
-                    <button class="btn-small btn-danger" onclick="clearAllData()" style="margin-left:5px">🗑️ Clear</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+                    <input type="text" id="searchLead" placeholder="Search contacts..." style="max-width:260px;flex:1">
+                    <button class="btn-ghost btn-sm" id="exportBtn">📥 Export CSV</button>
+                    <button class="btn-danger btn-sm" id="clearAllBtn">🗑️ Clear All</button>
                 </div>
-                <div class="overflow-x">
+                <div class="table-wrap">
                     <table>
-                        <thead><tr><th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Info</th><th></th></tr></thead>
-                        <tbody id="leadsTable"><tr><td colspan="6">No contacts</td></tr></tbody>
+                        <thead><tr><th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Info</th><th style="width:50px"></th></tr></thead>
+                        <tbody id="leadsTable"><tr><td colspan="6" class="empty-state"><span>👥</span>No contacts yet</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -172,36 +436,27 @@
         <div id="templates" class="tab-content">
             <div class="grid">
                 <div class="card">
-                    <h2>📚 Available Templates</h2>
-                    <button class="btn-success" onclick="newTemplate()" style="width:100%;margin-bottom:15px">+ Create New Template</button>
+                    <h2>📚 Templates</h2>
+                    <button class="btn-success btn-block" id="newTplBtn" style="margin-bottom:14px">+ Create New Template</button>
                     <div id="templatesList"></div>
                 </div>
-
                 <div class="card">
                     <h2>✏️ Template Editor</h2>
                     <div id="templateMsg" class="msg"></div>
                     <div id="templateEditor" style="display:none">
-                        <form id="templateForm" onsubmit="saveTemplate(event)">
-                            <div class="form-group">
-                                <label>Template Name *</label>
-                                <input type="text" id="tname" required placeholder="e.g., Real Estate Premium, Church Revival, etc">
-                            </div>
-                            <div class="form-group">
-                                <label>Email Subject Line *</label>
-                                <input type="text" id="tsubject" required placeholder="e.g., Join Us for {{prayerSection}}">
-                            </div>
+                        <form id="templateForm">
+                            <div class="form-group"><label>Template Name *</label><input type="text" id="tname" required placeholder="e.g., Real Estate Premium"></div>
+                            <div class="form-group"><label>Email Subject *</label><input type="text" id="tsubject" required placeholder="e.g., Join Us for {{prayerSection}}"></div>
                             <div class="form-group">
                                 <label>Email HTML Content *</label>
                                 <textarea id="tcontent" required placeholder="Paste your HTML email template here..."></textarea>
-                                <p style="font-size:12px;color:#666;margin-top:8px">📌 Use variables like {{firstName}}, {{companyName}}, {{zoomLink}}, {{meetingDate}}, {{meetingTime}}, {{prayerSection}}</p>
+                                <p class="hint">📌 Variables: <code>{{firstName}}</code>, <code>{{lastName}}</code>, <code>{{companyName}}</code>, <code>{{zoomLink}}</code>, <code>{{meetingDate}}</code>, <code>{{meetingTime}}</code>, <code>{{prayerSection}}</code>, <code>{{propertyAddress}}</code>, <code>{{propertyType}}</code>, <code>{{propertyPrice}}</code></p>
                             </div>
-                            <button type="submit" class="btn-success" style="width:100%;margin-bottom:8px">Save Template</button>
-                            <button type="button" class="btn-small" onclick="cancelTemplate()" style="width:100%;background:#999">Cancel</button>
+                            <button type="submit" class="btn-success btn-block" style="margin-bottom:8px">Save Template</button>
+                            <button type="button" class="btn-ghost btn-block" id="cancelTplBtn">Cancel</button>
                         </form>
                     </div>
-                    <div id="noTemplate" style="text-align:center;color:#999;padding:30px">
-                        <p>Select or create a template to edit</p>
-                    </div>
+                    <div id="noTemplate" class="empty-state"><span>📝</span>Select or create a template</div>
                 </div>
             </div>
         </div>
@@ -211,49 +466,52 @@
             <div class="card">
                 <h2>🚀 Send Campaign</h2>
                 <div id="campaignMsg" class="msg"></div>
-                
-                <!-- Template Selector -->
                 <div class="template-selector">
                     <h3>Step 1: Choose Template Type</h3>
-                    <div class="template-option" onclick="selectTemplate(1)">
-                        <strong>🏘️ Real Estate - Property Meeting</strong>
-                        <p style="font-size:12px;margin-top:5px">Send buyer interest meeting with property details</p>
+                    <div class="template-option" data-tpl="realestate">
+                        <strong>🏘️ Real Estate — Property Meeting</strong>
+                        <p>Send buyer interest meeting with property details</p>
                     </div>
-                    <div class="template-option" onclick="selectTemplate(2)">
-                        <strong>⛪ Church - Prayer Meeting Zoom</strong>
-                        <p style="font-size:12px;margin-top:5px">Send prayer meeting invitation with Scripture verse</p>
+                    <div class="template-option" data-tpl="prayer">
+                        <strong>⛪ Church — Prayer Meeting Zoom</strong>
+                        <p>Send prayer meeting invitation with Scripture verse</p>
                     </div>
-                    <input type="hidden" id="selectedTemplate" value="">
                 </div>
-
-                <form id="campaignForm" onsubmit="sendCampaign(event)">
-                    <h3 style="margin-top:20px;margin-bottom:15px">Step 2: Enter Meeting Details</h3>
-                    
-                    <div class="form-group"><label>Zoom Link *</label><input type="url" id="czoom" required placeholder="https://zoom.us/j/..."></div>
-                    <div class="form-group"><label>Meeting Date *</label><input type="text" id="cdate" required placeholder="February 14, 2026"></div>
+                <form id="campaignForm">
+                    <div class="section-label">Step 2: Meeting Details</div>
+                    <div class="grid">
+                        <div class="form-group"><label>Zoom Link *</label><input type="url" id="czoom" required placeholder="https://zoom.us/j/..."></div>
+                        <div class="form-group"><label>Meeting Date *</label><input type="text" id="cdate" required placeholder="February 14, 2026"></div>
+                    </div>
                     <div class="form-group"><label>Meeting Time *</label><input type="text" id="ctime" required placeholder="7:00 PM EST"></div>
-                    
-                    <!-- Real Estate Fields (hidden by default) -->
+
                     <div id="realEstateFields" style="display:none">
+                        <div class="section-label">Property Details</div>
                         <div class="form-group"><label>Property Address</label><input type="text" id="propAddress" placeholder="123 Main Street"></div>
-                        <div class="form-group"><label>Property Type</label><input type="text" id="propType" placeholder="House, Condo, etc"></div>
-                        <div class="form-group"><label>Property Price</label><input type="text" id="propPrice" placeholder="$450,000"></div>
+                        <div class="grid">
+                            <div class="form-group"><label>Property Type</label><input type="text" id="propType" placeholder="House, Condo, etc"></div>
+                            <div class="form-group"><label>Property Price</label><input type="text" id="propPrice" placeholder="$450,000"></div>
+                        </div>
                     </div>
-
-                    <!-- Prayer Fields (hidden by default) -->
                     <div id="prayerFields" style="display:none">
-                        <div class="form-group"><label>Prayer Section Name</label><input type="text" id="prayerSection" placeholder="Monday Evening Prayer, Wednesday Night Prayer, etc"></div>
+                        <div class="section-label">Prayer Details</div>
+                        <div class="form-group"><label>Prayer Section Name</label><input type="text" id="prayerSection" placeholder="Monday Evening Prayer"></div>
                     </div>
 
-                    <div class="loading" id="campaignLoading">⏳ Sending...</div>
-                    <button type="submit" class="btn-success" style="width:100%;margin-top:15px">Send Campaign to All Contacts</button>
+                    <div class="section-label">Step 3: Choose Template</div>
+                    <div class="form-group">
+                        <select id="campaignTemplateSelect">
+                            <option value="">— Select a template —</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-success btn-block" style="margin-top:8px">Send Campaign to All Contacts</button>
                 </form>
             </div>
-
-            <div class="card">
+            <div class="card" style="margin-top:16px">
                 <h2>📊 Campaign Status</h2>
-                <p id="campaignStatus" style="color:#666;font-size:14px">Ready to send campaigns</p>
-                <p id="campaignDetails" style="color:#999;font-size:13px;margin-top:10px"></p>
+                <p id="campaignStatus" style="color:var(--gray-500);font-size:14px">Ready to send campaigns</p>
+                <p id="campaignDetails" style="color:var(--gray-400);font-size:13px;margin-top:6px"></p>
             </div>
         </div>
 
@@ -261,13 +519,11 @@
         <div id="logs" class="tab-content">
             <div class="card">
                 <h2>📋 Sending Logs</h2>
-                <div style="margin-bottom:10px">
-                    <button class="btn-small" onclick="loadLogs()" style="margin-right:5px">🔄 Refresh</button>
-                    <button class="btn-small btn-danger" onclick="clearLogs()">Clear</button>
+                <div style="display:flex;gap:8px;margin-bottom:12px">
+                    <button class="btn-ghost btn-sm" id="refreshLogsBtn">🔄 Refresh</button>
+                    <button class="btn-danger btn-sm" id="clearLogsBtn">🗑️ Clear</button>
                 </div>
-                <div id="logsList" style="max-height:600px;overflow-y:auto">
-                    <div style="text-align:center;color:#999;padding:40px">No logs yet</div>
-                </div>
+                <div id="logsList"></div>
             </div>
         </div>
 
@@ -277,485 +533,448 @@
                 <div class="card">
                     <h2>⚙️ SMTP Configuration</h2>
                     <div id="smtpMsg" class="msg"></div>
-                    <form id="smtpForm" onsubmit="saveSmtp(event)">
-                        <div class="form-group"><label>SMTP Host *</label><input type="text" id="shost" required placeholder="smtp.gmail.com or mail.yourdomain.com"></div>
-                        
+                    <form id="smtpForm">
+                        <div class="form-group"><label>SMTP Host *</label><input type="text" id="shost" required placeholder="smtp.gmail.com"></div>
                         <div class="form-group">
                             <label>Port *</label>
-                            <select id="sport" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:inherit" onchange="updateEncryptionOptions()">
-                                <option value="25">25 - SMTP (No Encryption / STARTTLS)</option>
-                                <option value="465">465 - SMTPS (SSL/TLS)</option>
-                                <option value="587" selected>587 - SMTP (STARTTLS)</option>
-                                <option value="2525">2525 - Alternative SMTP</option>
-                                <option value="custom">Custom Port</option>
+                            <select id="sport">
+                                <option value="25">25 — SMTP (No Encryption / STARTTLS)</option>
+                                <option value="465">465 — SMTPS (SSL/TLS)</option>
+                                <option value="587" selected>587 — SMTP (STARTTLS)</option>
+                                <option value="2525">2525 — Alternative SMTP</option>
                             </select>
                         </div>
-                        
-                        <div class="form-group" id="customPortGroup" style="display:none">
-                            <label>Custom Port Number</label>
-                            <input type="number" id="customPort" placeholder="Enter port number" min="1" max="65535">
-                        </div>
-                        
                         <div class="form-group">
-                            <label>Encryption Type</label>
-                            <select id="ssecure" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:inherit">
-                                <option value="none">None (Port 25)</option>
-                                <option value="starttls">STARTTLS (Ports 25, 587)</option>
-                                <option value="true" selected>SSL/TLS (Port 465, 587)</option>
+                            <label>Encryption</label>
+                            <select id="ssecure">
+                                <option value="none">None</option>
+                                <option value="starttls">STARTTLS</option>
+                                <option value="ssl" selected>SSL/TLS</option>
                             </select>
-                            <p style="font-size:12px;color:#666;margin-top:5px">💡 Port 25: Choose None or STARTTLS | Port 465: Choose SSL/TLS | Port 587: Choose STARTTLS or SSL/TLS</p>
                         </div>
-                        
-                        <div class="form-group"><label>Auth Email/Username</label><input type="email" id="suser" placeholder="Only needed for ports 465, 587"></div>
-                        <div class="form-group"><label>Password/App Password</label><input type="password" id="spass" placeholder="Leave blank for port 25 if not needed"></div>
-                        <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="Your Name or Prayer Team"></div>
-                        <div class="form-group"><label>Company Name</label><input type="text" id="scompany" placeholder="Your Church or Organization"></div>
+                        <div class="form-group"><label>Auth Email / Username</label><input type="text" id="suser" placeholder="your@email.com"></div>
+                        <div class="form-group"><label>Password / App Password</label><input type="password" id="spass" placeholder="••••••••"></div>
+                        <div class="form-group"><label>Sender Name</label><input type="text" id="ssendername" placeholder="Your Name or Team"></div>
+                        <div class="form-group"><label>Company / Org Name</label><input type="text" id="scompany" placeholder="Your Church or Company"></div>
                         <div class="form-group"><label>Phone</label><input type="text" id="sphone" placeholder="+1-XXX-XXX-XXXX"></div>
-                        <button type="submit" class="btn-success" style="width:100%">Save Settings</button>
+                        <button type="submit" class="btn-success btn-block">Save SMTP Settings</button>
                     </form>
                 </div>
-
                 <div class="card">
-                    <h2>🧪 Test SMTP</h2>
-                    <button onclick="testSmtp()" class="btn-success" style="width:100%;margin-bottom:10px">Test Connection</button>
+                    <h2>🧪 Test Connection</h2>
                     <div id="testResult" class="msg"></div>
-                    <label>Test Email</label>
-                    <input type="email" id="testEmail" placeholder="your@email.com">
-                    <button onclick="sendTestEmail()" class="btn-success" style="width:100%;margin-top:10px">Send Test</button>
+                    <p style="color:var(--gray-500);font-size:13px;margin-bottom:12px">
+                        This standalone version simulates sending. In production, connect a real SMTP backend.
+                    </p>
+                    <div class="form-group"><label>Test Email Address</label><input type="email" id="testEmail" placeholder="your@email.com"></div>
+                    <button class="btn-success btn-block" id="sendTestBtn">Send Test Email</button>
+                    <div id="smtpStatusWrap" style="margin-top:14px"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- PREVIEW MODAL -->
-    <div id="previewModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Contact Details</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div id="previewContent"></div>
+<!-- PREVIEW MODAL -->
+<div class="modal-bg" id="previewModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 style="font-size:16px">Email Preview</h2>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
         </div>
+        <div id="previewContent" class="preview-html"></div>
     </div>
+</div>
 
-    <script>
-        const API = '/api';
-        let leads = [];
-        let templates = [];
-        let logs = [];
+<script>
+// ================================================================
+// DATA STORE (in-memory)
+// ================================================================
+let nextId = 1;
+let leads = [];
+let tplNextId = 1;
+let templates = [];
+let campaignLogs = [];
+let campaignCount = 0;
+let smtpSettings = { host: '', port: 587, encryption: 'ssl', user: '', pass: '', senderName: '', companyName: '', companyPhone: '' };
+let selectedCampaignType = '';
+let editTplId = null;
 
-        // ============================================================
-        // SMART NAME EXTRACTION FROM EMAIL ADDRESS
-        // ============================================================
-        // Takes an email like "stevenkilan@gmail.com" and returns
-        // { firstName: "Steven", lastName: "Kilan" }
-        // Handles: dots, underscores, hyphens, numbers, camelCase
-        // ============================================================
-        function extractNameFromEmail(email) {
-            if (!email || !email.includes('@')) return { firstName: '', lastName: '' };
+// Seed default templates
+templates = [
+    {
+        id: tplNextId++,
+        name: 'Real Estate — Property Meeting',
+        subject: 'Property Meeting Invitation: {{propertyAddress}}',
+        html: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px"><h2 style="color:#4f46e5">🏘️ Property Meeting Invitation</h2><p>Dear <strong>{{firstName}} {{lastName}}</strong>,</p><p>You are invited to a property meeting regarding:</p><table style="width:100%;border-collapse:collapse;margin:16px 0"><tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Property</td><td style="padding:8px;border:1px solid #ddd">{{propertyAddress}}</td></tr><tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Type</td><td style="padding:8px;border:1px solid #ddd">{{propertyType}}</td></tr><tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Price</td><td style="padding:8px;border:1px solid #ddd">{{propertyPrice}}</td></tr><tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Date</td><td style="padding:8px;border:1px solid #ddd">{{meetingDate}}</td></tr><tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Time</td><td style="padding:8px;border:1px solid #ddd">{{meetingTime}}</td></tr></table><p><a href="{{zoomLink}}" style="display:inline-block;padding:12px 24px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold">Join Zoom Meeting</a></p><p style="color:#666;margin-top:20px">Best regards,<br>{{companyName}}<br>{{companyPhone}}</p></div>'
+    },
+    {
+        id: tplNextId++,
+        name: 'Church — Prayer Meeting Zoom',
+        subject: "You're Invited: {{prayerSection}} 🙏",
+        html: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px"><h2 style="color:#7c3aed">⛪ Prayer Meeting Invitation</h2><p>Dear <strong>{{firstName}}</strong>,</p><p>You are warmly invited to join us for <strong>{{prayerSection}}</strong>.</p><div style="background:#f5f3ff;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #7c3aed"><p style="margin:0"><strong>📅 Date:</strong> {{meetingDate}}</p><p style="margin:6px 0 0"><strong>🕐 Time:</strong> {{meetingTime}}</p></div><p style="font-style:italic;color:#666;margin:16px 0">"For where two or three gather in my name, there am I with them." — Matthew 18:20</p><p><a href="{{zoomLink}}" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold">Join Prayer Meeting on Zoom</a></p><p style="color:#666;margin-top:20px">In His service,<br>{{companyName}}<br>{{companyPhone}}</p></div>'
+    }
+];
 
-            // Get the part before @
-            let local = email.split('@')[0].trim().toLowerCase();
+// ================================================================
+// SMART NAME EXTRACTION
+// ================================================================
+function extractNameFromEmail(email) {
+    if (!email || !email.includes('@')) return { firstName: '', lastName: '' };
+    let local = email.split('@')[0].trim().toLowerCase().replace(/\d+$/g, '').replace(/^\d+/g, '');
+    if (!local) local = email.split('@')[0].trim();
+    let parts = [];
+    if (/[._\-]/.test(local)) {
+        parts = local.split(/[._\-]+/).filter(p => p.length > 0);
+    } else {
+        const camel = local.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ');
+        parts = camel.length > 1 ? camel : smartSplit(local);
+    }
+    parts = parts.filter(p => p.replace(/\d/g, '').length > 0);
+    const cap = s => { s = s.replace(/\d/g, ''); return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''; };
+    return parts.length >= 2
+        ? { firstName: cap(parts[0]), lastName: cap(parts.slice(1).join(' ')) }
+        : { firstName: cap(parts[0] || ''), lastName: '' };
+}
 
-            // Remove trailing numbers (e.g. john.doe92 -> john.doe)
-            local = local.replace(/\d+$/g, '');
+function smartSplit(str) {
+    if (str.length <= 3) return [str];
+    const names = ['james','john','robert','michael','david','william','richard','joseph','thomas','charles','christopher','daniel','matthew','anthony','mark','donald','steven','steve','paul','andrew','joshua','kenneth','kevin','brian','george','timothy','ronald','edward','jason','jeffrey','ryan','jacob','gary','nicholas','eric','jonathan','stephen','larry','justin','scott','brandon','benjamin','samuel','raymond','gregory','frank','alexander','patrick','jack','dennis','jerry','tyler','aaron','jose','adam','nathan','henry','peter','zachary','douglas','mary','patricia','jennifer','linda','barbara','elizabeth','susan','jessica','sarah','karen','lisa','nancy','betty','margaret','sandra','ashley','dorothy','kimberly','emily','donna','michelle','carol','amanda','melissa','deborah','stephanie','rebecca','sharon','laura','cynthia','kathleen','amy','angela','shirley','anna','brenda','pamela','emma','nicole','helen','samantha','katherine','christine','debra','rachel','carolyn','janet','catherine','maria','heather','diane','ruth','julie','olivia','joyce','virginia','victoria','kelly','lauren','christina','joan','evelyn','judith','megan','andrea','cheryl','hannah','jacqueline','martha','gloria','teresa','ann','sara','madison','frances','kathryn','janice','jean','abigail','alice','grace','rosa','philip','roger','ralph','roy','eugene','randy','wayne','alan','carl','albert','arthur','lawrence','jesse','dylan','bryan','joe','jordan','billy','bruce','willie','gabriel','logan','allan','luke','don','elijah','isaac'];
+    for (const n of names) {
+        if (str.startsWith(n) && str.length > n.length && (str.length - n.length) >= 2) return [n, str.slice(n.length)];
+    }
+    return [str];
+}
 
-            // Remove leading numbers
-            local = local.replace(/^\d+/g, '');
+function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim()); }
 
-            // If empty after cleanup, fallback
-            if (!local) {
-                local = email.split('@')[0].trim();
-            }
+function isEmailPerLine(text) {
+    const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+    if (!lines.length) return false;
+    let c = 0;
+    for (const l of lines) { if (isEmail(l)) c++; }
+    return (c / lines.length) >= 0.7;
+}
 
-            let parts = [];
+function parseEmailLines(text) {
+    const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+    const contacts = [], failed = [];
+    for (const l of lines) {
+        if (isEmail(l)) {
+            const { firstName, lastName } = extractNameFromEmail(l);
+            contacts.push({ firstName, lastName, email: l.toLowerCase(), phone: '', info: '' });
+        } else failed.push(l);
+    }
+    return { contacts, failed };
+}
 
-            // Split by common separators: dot, underscore, hyphen
-            if (/[._\-]/.test(local)) {
-                parts = local.split(/[._\-]+/).filter(p => p.length > 0);
-            } else {
-                // Try camelCase split: "stevenkilan" -> try to find two names
-                // Look for camelCase like "stevenKilan"
-                const camelParts = local.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ');
-                if (camelParts.length > 1) {
-                    parts = camelParts;
-                } else {
-                    // Single block like "stevenkilan" — try common name detection
-                    // Use a simple heuristic: if length > 5, try to split roughly in half
-                    // But first, check for double consonant or vowel-consonant transitions
-                    parts = smartSplitName(local);
-                }
-            }
+function parseCSV(text) {
+    const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) return { contacts: [], failed: 0 };
+    const contacts = [];
+    let failed = 0;
+    for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim());
+        const emailIdx = cols.findIndex(c => isEmail(c));
+        if (emailIdx >= 0) {
+            contacts.push({
+                firstName: cols[0] || '',
+                lastName: cols[1] || '',
+                email: cols[emailIdx].toLowerCase(),
+                phone: cols[3] || '',
+                info: cols[4] || ''
+            });
+        } else failed++;
+    }
+    return { contacts, failed };
+}
 
-            // Clean up: remove pure number parts, very short fragments
-            parts = parts.filter(p => p.replace(/\d/g, '').length > 0);
+// ================================================================
+// UTILITY
+// ================================================================
+function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'msg msg-' + type;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+}
 
-            // Capitalize each part
-            const capitalize = (str) => {
-                if (!str) return '';
-                str = str.replace(/\d/g, ''); // strip leftover numbers
-                return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-            };
+function replaceVars(str, vars) {
+    return str.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] || '');
+}
 
-            let firstName = '', lastName = '';
+// ================================================================
+// DASHBOARD
+// ================================================================
+function refreshDash() {
+    document.getElementById('dContacts').textContent = leads.length;
+    document.getElementById('dTemplates').textContent = templates.length;
+    document.getElementById('dCampaigns').textContent = campaignCount;
+    document.getElementById('dEmails').textContent = campaignLogs.length;
+}
 
-            if (parts.length >= 2) {
-                firstName = capitalize(parts[0]);
-                lastName = capitalize(parts.slice(1).join(' '));
-            } else if (parts.length === 1) {
-                firstName = capitalize(parts[0]);
-                lastName = '';
-            }
+// ================================================================
+// CONTACTS
+// ================================================================
+function addContact(c) {
+    if (!c.email || !isEmail(c.email)) return false;
+    if (leads.find(l => l.email.toLowerCase() === c.email.toLowerCase())) return false;
+    leads.push({ id: nextId++, firstName: c.firstName || '', lastName: c.lastName || '', email: c.email.toLowerCase(), phone: c.phone || '', info: c.info || '' });
+    return true;
+}
 
-            return { firstName, lastName };
-        }
+function renderLeads() {
+    const q = (document.getElementById('searchLead')?.value || '').toLowerCase();
+    const f = leads.filter(l => (l.firstName + l.lastName + l.email + l.phone + l.info).toLowerCase().includes(q));
+    const tbody = document.getElementById('leadsTable');
+    if (!f.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><span>👥</span>No contacts yet</td></tr>';
+        return;
+    }
+    tbody.innerHTML = f.map(l => '<tr>' +
+        '<td>' + (l.firstName || '—') + '</td><td>' + (l.lastName || '—') + '</td>' +
+        '<td>' + l.email + '</td><td>' + (l.phone || '—') + '</td><td>' + (l.info || '—') + '</td>' +
+        '<td><button class="btn-danger btn-sm" data-delete="' + l.id + '">🗑️</button></td>' +
+    '</tr>').join('');
+}
 
-        // Attempt to intelligently split a single-block name like "stevenkilan"
-        function smartSplitName(str) {
-            if (str.length <= 3) return [str];
+// ================================================================
+// TEMPLATES
+// ================================================================
+function renderTemplates() {
+    const el = document.getElementById('templatesList');
+    if (!templates.length) { el.innerHTML = '<div class="empty-state"><span>📝</span>No templates</div>'; return; }
+    el.innerHTML = templates.map(t => '<div style="padding:14px;border:1.5px solid var(--gray-200);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .2s;background:#fff" class="tpl-item" data-tpl-id="' + t.id + '">' +
+        '<strong style="font-size:14px">' + t.name + '</strong>' +
+        '<p style="font-size:12px;color:var(--gray-500);margin-top:4px">' + t.subject.substring(0,80) + '</p>' +
+        '<div style="margin-top:8px;display:flex;gap:6px">' +
+            '<button class="btn-sm btn-ghost" data-preview-tpl="' + t.id + '">👁 Preview</button>' +
+            '<button class="btn-sm btn-danger" data-del-tpl="' + t.id + '">🗑️</button>' +
+        '</div>' +
+    '</div>').join('');
 
-            // Common first names to try matching at the start
-            const commonNames = [
-                'james','john','robert','michael','david','william','richard','joseph','thomas','charles',
-                'christopher','daniel','matthew','anthony','mark','donald','steven','steve','paul','andrew',
-                'joshua','kenneth','kevin','brian','george','timothy','ronald','edward','jason','jeffrey',
-                'ryan','jacob','gary','nicholas','eric','jonathan','stephen','larry','justin','scott',
-                'brandon','benjamin','samuel','raymond','gregory','frank','alexander','patrick','jack','dennis',
-                'jerry','tyler','aaron','jose','adam','nathan','henry','peter','zachary','douglas',
-                'mary','patricia','jennifer','linda','barbara','elizabeth','susan','jessica','sarah','karen',
-                'lisa','nancy','betty','margaret','sandra','ashley','dorothy','kimberly','emily','donna',
-                'michelle','carol','amanda','melissa','deborah','stephanie','rebecca','sharon','laura','cynthia',
-                'kathleen','amy','angela','shirley','anna','brenda','pamela','emma','nicole','helen',
-                'samantha','katherine','christine','debra','rachel','carolyn','janet','catherine','maria','heather',
-                'diane','ruth','julie','olivia','joyce','virginia','victoria','kelly','lauren','christina',
-                'joan','evelyn','judith','megan','andrea','cheryl','hannah','jacqueline','martha','gloria',
-                'teresa','ann','sara','madison','frances','kathryn','janice','jean','abigail','alice',
-                'grace','rosa','peter','philip','roger','ralph','roy','eugene','randy','wayne',
-                'alan','carl','albert','arthur','lawrence','jesse','dylan','bryan','joe','jordan',
-                'billy','bruce','willie','gabriel','logan','allan','luke','don','elijah','isaac'
-            ];
+    const sel = document.getElementById('campaignTemplateSelect');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Select a template —</option>' + templates.map(t => '<option value="' + t.id + '">' + t.name + '</option>').join('');
+    sel.value = current;
+}
 
-            // Try to match a common first name at the beginning
-            for (const name of commonNames) {
-                if (str.startsWith(name) && str.length > name.length) {
-                    const remainder = str.slice(name.length);
-                    if (remainder.length >= 2) {
-                        return [name, remainder];
-                    }
-                }
-            }
+// ================================================================
+// CAMPAIGNS — simulate sending
+// ================================================================
+function simulateSend(templateId, vars) {
+    const tpl = templates.find(t => t.id === parseInt(templateId));
+    if (!tpl) return { sent: 0, failed: 0, error: 'Template not found' };
+    if (!leads.length) return { sent: 0, failed: 0, error: 'No contacts to send to' };
+    if (!smtpSettings.host) return { sent: 0, failed: 0, error: 'SMTP not configured — go to SMTP tab first' };
 
-            // If no common name match, return as single first name
-            return [str];
-        }
+    let sent = 0, failed = 0;
+    const cid = ++campaignCount;
+    for (const lead of leads) {
+        const v = { ...vars, firstName: lead.firstName, lastName: lead.lastName, email: lead.email, companyName: smtpSettings.companyName, companyPhone: smtpSettings.companyPhone };
+        const ok = Math.random() > 0.1;
+        campaignLogs.push({
+            campaignId: cid,
+            leadName: (lead.firstName + ' ' + lead.lastName).trim() || lead.email,
+            leadEmail: lead.email,
+            subject: replaceVars(tpl.subject, v),
+            status: ok ? 'success' : 'failed',
+            message: ok ? 'Delivered' : 'SMTP timeout (simulated)',
+            timestamp: new Date().toISOString()
+        });
+        if (ok) sent++; else failed++;
+    }
+    return { sent, failed, success: true };
+}
 
-        // Check if a line looks like an email address
-        function isEmailLine(line) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(line.trim());
-        }
+// ================================================================
+// LOGS
+// ================================================================
+function renderLogs() {
+    const el = document.getElementById('logsList');
+    if (!campaignLogs.length) { el.innerHTML = '<div class="empty-state"><span>📋</span>No logs yet</div>'; return; }
+    el.innerHTML = [...campaignLogs].reverse().map(l => '<div class="log-entry ' + (l.status === 'success' ? 'log-success' : 'log-error') + '">' +
+        '<strong>' + l.leadName + '</strong> &lt;' + l.leadEmail + '&gt;' +
+        '<span class="badge ' + (l.status === 'success' ? 'badge-success' : 'badge-danger') + '" style="margin-left:8px">' + l.status + '</span><br>' +
+        '<small style="color:var(--gray-500)">' + l.subject + ' — ' + new Date(l.timestamp).toLocaleString() + '</small>' +
+    '</div>').join('');
+}
 
-        // Check if text is "one email per line" format vs CSV
-        function isEmailPerLineFormat(text) {
-            const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (lines.length === 0) return false;
+// ================================================================
+// EVENT WIRING
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Tab switching
+    document.getElementById('mainTabs').addEventListener('click', e => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        btn.classList.add('active');
+        if (btn.dataset.tab === 'dashboard') refreshDash();
+        if (btn.dataset.tab === 'contacts') renderLeads();
+        if (btn.dataset.tab === 'templates') renderTemplates();
+        if (btn.dataset.tab === 'logs') renderLogs();
+    });
 
-            // If most lines (>= 70%) are plain email addresses, treat as email-per-line
-            let emailCount = 0;
-            for (const line of lines) {
-                if (isEmailLine(line)) emailCount++;
-            }
-            return (emailCount / lines.length) >= 0.7;
-        }
+    // Import tabs
+    document.querySelectorAll('.tab-inner[data-import]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-inner[data-import]').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-inner-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('import' + btn.dataset.import.charAt(0).toUpperCase() + btn.dataset.import.slice(1)).classList.add('active');
+        });
+    });
 
-        // Parse email-per-line text into contacts array
-        function parseEmailPerLine(text) {
-            const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            const contacts = [];
-            const failed = [];
-
-            for (const line of lines) {
-                const email = line.trim();
-                if (isEmailLine(email)) {
-                    const { firstName, lastName } = extractNameFromEmail(email);
-                    contacts.push({
-                        firstName: firstName,
-                        lastName: lastName,
-                        email: email.toLowerCase(),
-                        phone: '',
-                        propertyAddress: ''
-                    });
-                } else {
-                    failed.push(line);
-                }
-            }
-
-            return { contacts, failed };
-        }
-
-        // ============================================================
-        // TAB SWITCHING
-        // ============================================================
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
-            if (tab === 'leads') loadLeads();
-            if (tab === 'templates') loadTemplates();
-            if (tab === 'logs') loadLogs();
-            if (tab === 'dashboard') loadDash();
-        }
-
-        function switchImportTab(tab) {
-            document.querySelectorAll('.tab-inner-content').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.tab-inner').forEach(e => e.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function updateEncryptionOptions() {
-            const port = document.getElementById('sport').value;
-            const customPortGroup = document.getElementById('customPortGroup');
-            
-            if (port === 'custom') {
-                customPortGroup.style.display = 'block';
-            } else {
-                customPortGroup.style.display = 'none';
-            }
-        }
-
-        function selectTemplate(id) {
-            document.querySelectorAll('.template-option').forEach(e => e.classList.remove('selected'));
-            event.currentTarget.classList.add('selected');
-            document.getElementById('selectedTemplate').value = id;
-            document.getElementById('realEstateFields').style.display = id === 1 ? 'block' : 'none';
-            document.getElementById('prayerFields').style.display = id === 2 ? 'block' : 'none';
-        }
-
-        function showMsg(id, text, type) {
-            const el = document.getElementById(id);
-            el.textContent = text;
-            el.className = 'msg msg-' + type;
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
-        }
-
-        // ============================================================
-        // DASHBOARD
-        // ============================================================
-        async function loadDash() {
-            leads = await fetch(`${API}/leads`).then(r => r.json()).catch(() => []);
-            templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
-            logs = await fetch(`${API}/campaigns/logs`).then(r => r.json()).catch(() => []);
-            document.getElementById('dashContacts').textContent = leads.length;
-            document.getElementById('dashTemplates').textContent = templates.length;
-            document.getElementById('dashCampaigns').textContent = [...new Set(logs.map(l => l.campaignId))].length;
-            document.getElementById('dashEmails').textContent = logs.length;
-        }
-
-        // ============================================================
-        // LEADS / CONTACTS
-        // ============================================================
-        async function loadLeads() {
-            leads = await fetch(`${API}/leads`).then(r => r.json()).catch(() => []);
+    // Add contact form
+    document.getElementById('addForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const ok = addContact({
+            firstName: document.getElementById('fn').value,
+            lastName: document.getElementById('ln').value,
+            email: document.getElementById('em').value,
+            phone: document.getElementById('ph').value,
+            info: document.getElementById('ad').value
+        });
+        if (ok) {
+            document.getElementById('addForm').reset();
+            showMsg('addMsg', '✓ Contact added!', 'success');
             renderLeads();
+        } else showMsg('addMsg', '✗ Invalid or duplicate email', 'error');
+    });
+
+    // Paste import
+    document.getElementById('pasteBtn').addEventListener('click', () => {
+        const text = document.getElementById('pasteArea').value;
+        if (!text.trim()) { showMsg('uploadMsg', '⚠ Paste data first', 'warning'); return; }
+        let added = 0, fail = 0;
+        if (isEmailPerLine(text)) {
+            const { contacts, failed } = parseEmailLines(text);
+            fail = failed.length;
+            for (const c of contacts) { if (addContact(c)) added++; else fail++; }
+        } else {
+            const { contacts, failed: f } = parseCSV(text);
+            fail = f;
+            for (const c of contacts) { if (addContact(c)) added++; else fail++; }
         }
+        document.getElementById('addedCount').textContent = added;
+        document.getElementById('failedCount').textContent = fail;
+        document.getElementById('importStats').style.display = 'block';
+        showMsg('uploadMsg', '✓ ' + added + ' contacts imported!', 'success');
+        document.getElementById('pasteArea').value = '';
+        renderLeads();
+    });
 
-        function renderLeads() {
-            const search = document.getElementById('searchLead')?.value?.toLowerCase() || '';
-            const f = leads.filter(l => (l.firstName + l.lastName + l.email).toLowerCase().includes(search));
-            const html = f.length ? f.map(l => `<tr><td>${l.firstName||'—'}</td><td>${l.lastName||'—'}</td><td>${l.email}</td><td>${l.phone||'—'}</td><td>${l.propertyAddress||'—'}</td><td><button class="btn-small btn-danger" onclick="deleteLead(${l.id})">🗑️</button></td></tr>`).join('') : '<tr><td colspan="6">No contacts</td></tr>';
-            document.getElementById('leadsTable').innerHTML = html;
-        }
-
-        async function addLead(e) {
-            e.preventDefault();
-            const r = await fetch(`${API}/leads`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    firstName: document.getElementById('fn').value,
-                    lastName: document.getElementById('ln').value,
-                    email: document.getElementById('em').value,
-                    phone: document.getElementById('ph').value,
-                    propertyAddress: document.getElementById('ad').value
-                })
-            }).then(r => r.json());
-            if (r.success) {
-                document.getElementById('addForm').reset();
-                showMsg('addMsg', '✓ Contact added!', 'success');
-                loadLeads();
-            } else showMsg('addMsg', '✗ ' + r.error, 'error');
-        }
-
-        // ============================================================
-        // PASTE IMPORT — NOW WITH SMART EMAIL DETECTION
-        // ============================================================
-        async function pasteLead() {
-            const text = document.getElementById('pasteArea').value;
-            if (!text.trim()) { showMsg('uploadMsg', '⚠ Paste data first', 'warning'); return; }
-            
-            document.getElementById('importLoading').style.display = 'block';
-            document.getElementById('importStats').style.display = 'none';
-
-            // Check if it's email-per-line format
-            if (isEmailPerLineFormat(text)) {
-                // CLIENT-SIDE: parse emails and extract names, then send individually
-                const { contacts, failed } = parseEmailPerLine(text);
-                let inserted = 0;
-                let failCount = failed.length;
-
-                for (const contact of contacts) {
-                    try {
-                        const r = await fetch(`${API}/leads`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(contact)
-                        }).then(r => r.json());
-                        if (r.success) inserted++;
-                        else failCount++;
-                    } catch (err) {
-                        failCount++;
-                    }
-                }
-
-                document.getElementById('addedCount').textContent = inserted;
-                document.getElementById('failedCount').textContent = failCount;
-                document.getElementById('importStats').style.display = 'block';
-                showMsg('uploadMsg', `✓ ${inserted} contacts imported from emails! Names auto-detected.`, 'success');
-                document.getElementById('importLoading').style.display = 'none';
-                document.getElementById('pasteArea').value = '';
-                loadLeads();
+    // File upload
+    document.getElementById('fileDropZone').addEventListener('click', () => document.getElementById('fileInput').click());
+    document.getElementById('fileInput').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const text = ev.target.result;
+            let added = 0, fail = 0;
+            if (isEmailPerLine(text)) {
+                const { contacts, failed } = parseEmailLines(text);
+                fail = failed.length;
+                for (const c of contacts) { if (addContact(c)) added++; else fail++; }
             } else {
-                // ORIGINAL CSV FORMAT — send to server paste endpoint
-                const r = await fetch(`${API}/leads/paste`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
-                }).then(r => r.json()).catch(() => ({ inserted: 0, failed: 0 }));
-                document.getElementById('addedCount').textContent = r.inserted || 0;
-                document.getElementById('failedCount').textContent = r.failed || 0;
-                document.getElementById('importStats').style.display = 'block';
-                showMsg('uploadMsg', `✓ ${r.inserted || 0} contacts added!`, 'success');
-                document.getElementById('importLoading').style.display = 'none';
-                document.getElementById('pasteArea').value = '';
-                loadLeads();
+                const { contacts, failed: f } = parseCSV(text);
+                fail = f;
+                for (const c of contacts) { if (addContact(c)) added++; else fail++; }
             }
-        }
-
-        // ============================================================
-        // FILE UPLOAD — NOW ALSO HANDLES .TXT WITH EMAILS
-        // ============================================================
-        async function uploadFile(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('importLoading').style.display = 'block';
-            document.getElementById('importStats').style.display = 'none';
-
-            const ext = file.name.split('.').pop().toLowerCase();
-
-            // If it's a .txt file, read it and use the smart email parser
-            if (ext === 'txt') {
-                const reader = new FileReader();
-                reader.onload = async function(ev) {
-                    const text = ev.target.result;
-                    if (isEmailPerLineFormat(text)) {
-                        const { contacts, failed } = parseEmailPerLine(text);
-                        let inserted = 0;
-                        let failCount = failed.length;
-
-                        for (const contact of contacts) {
-                            try {
-                                const r = await fetch(`${API}/leads`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(contact)
-                                }).then(r => r.json());
-                                if (r.success) inserted++;
-                                else failCount++;
-                            } catch (err) {
-                                failCount++;
-                            }
-                        }
-
-                        document.getElementById('addedCount').textContent = inserted;
-                        document.getElementById('failedCount').textContent = failCount;
-                        document.getElementById('importStats').style.display = 'block';
-                        showMsg('uploadMsg', `✓ ${inserted} contacts imported from TXT! Names auto-detected.`, 'success');
-                        document.getElementById('importLoading').style.display = 'none';
-                        loadLeads();
-                    } else {
-                        // Treat as CSV-like text
-                        document.getElementById('pasteArea').value = text;
-                        document.getElementById('importLoading').style.display = 'none';
-                        showMsg('uploadMsg', '💡 File loaded into paste area. Click "Paste & Import" to process.', 'warning');
-                    }
-                };
-                reader.readAsText(file);
-                return;
-            }
-
-            // For CSV / Excel files — use original upload endpoint
-            const fd = new FormData();
-            fd.append('file', file);
-            const r = await fetch(`${API}/leads/upload`, {
-                method: 'POST',
-                body: fd
-            }).then(r => r.json()).catch(() => ({ inserted: 0, failed: 0 }));
-            document.getElementById('addedCount').textContent = r.inserted || 0;
-            document.getElementById('failedCount').textContent = r.failed || 0;
+            document.getElementById('addedCount').textContent = added;
+            document.getElementById('failedCount').textContent = fail;
             document.getElementById('importStats').style.display = 'block';
-            showMsg('uploadMsg', `✓ ${r.inserted || 0} contacts added!`, 'success');
-            document.getElementById('importLoading').style.display = 'none';
-            loadLeads();
+            showMsg('uploadMsg', '✓ ' + added + ' contacts imported from file!', 'success');
+            renderLeads();
+        };
+        reader.readAsText(file);
+    });
+
+    // Delete contact
+    document.getElementById('leadsTable').addEventListener('click', e => {
+        const btn = e.target.closest('[data-delete]');
+        if (!btn) return;
+        leads = leads.filter(l => l.id !== parseInt(btn.dataset.delete));
+        renderLeads();
+    });
+
+    // Search
+    document.getElementById('searchLead').addEventListener('input', renderLeads);
+
+    // Export
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const csv = 'First,Last,Email,Phone,Info\n' + leads.map(l => '"' + l.firstName + '","' + l.lastName + '","' + l.email + '","' + l.phone + '","' + l.info + '"').join('\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/csv,' + encodeURIComponent(csv);
+        a.download = 'contacts.csv';
+        a.click();
+    });
+
+    // Clear all
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+        if (confirm('Delete ALL contacts?')) { leads = []; nextId = 1; renderLeads(); showMsg('addMsg', '✓ All contacts cleared', 'success'); }
+    });
+
+    // Templates
+    document.getElementById('newTplBtn').addEventListener('click', () => {
+        editTplId = null;
+        document.getElementById('tname').value = '';
+        document.getElementById('tsubject').value = '';
+        document.getElementById('tcontent').value = '';
+        document.getElementById('templateEditor').style.display = 'block';
+        document.getElementById('noTemplate').style.display = 'none';
+    });
+
+    document.getElementById('cancelTplBtn').addEventListener('click', () => {
+        document.getElementById('templateEditor').style.display = 'none';
+        document.getElementById('noTemplate').style.display = 'block';
+    });
+
+    document.getElementById('templateForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const data = { name: document.getElementById('tname').value, subject: document.getElementById('tsubject').value, html: document.getElementById('tcontent').value };
+        if (editTplId) {
+            const t = templates.find(x => x.id === editTplId);
+            if (t) Object.assign(t, data);
+        } else {
+            templates.push({ id: tplNextId++, ...data });
         }
+        showMsg('templateMsg', '✓ Template saved!', 'success');
+        document.getElementById('templateEditor').style.display = 'none';
+        document.getElementById('noTemplate').style.display = 'block';
+        renderTemplates();
+    });
 
-        async function deleteLead(id) {
-            if (confirm('Delete?')) {
-                await fetch(`${API}/leads/${id}`, { method: 'DELETE' });
-                loadLeads();
-            }
-        }
-
-        function exportLeads() {
-            const csv = 'First,Last,Email,Phone,Info\n' + leads.map(l => `"${l.firstName||''}","${l.lastName||''}","${l.email}","${l.phone||''}","${l.propertyAddress||''}"`).join('\n');
-            const a = document.createElement('a');
-            a.href = 'data:text/csv,' + encodeURIComponent(csv);
-            a.download = 'contacts.csv';
-            a.click();
-        }
-
-        async function clearAllData() {
-            if (confirm('Delete ALL data?')) {
-                const r = await fetch(`${API}/clear-all`, { method: 'POST' }).then(r => r.json());
-                if (r.success) { leads = []; templates = []; logs = []; renderLeads(); loadTemplates(); loadLogs(); showMsg('addMsg', '✓ Cleared!', 'success'); }
-            }
-        }
-
-        // ============================================================
-        // TEMPLATES
-        // ============================================================
-        async function loadTemplates() {
-            templates = await fetch(`${API}/templates`).then(r => r.json()).catch(() => []);
-            const html = templates.map(t => `<div style="padding:15px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;background:#f9f9f9;cursor:pointer;transition:all .3s" onclick="editTemplate(${t.id})" onmouseover="this.style.background='#e8f0ff'" onmouseout="this.style.background='#f9f9f9'"><strong>${t.name}</strong><p style="font-size:12px;color:#666;margin-top:5px">${t.subject.substring(0,60)}</p></div>`).join('');
-            document.getElementById('templatesList').innerHTML = html;
-        }
-
-        let editId = null;
-
-        function newTemplate() {
-            editId = null;
-            document.getElementById('tname').value = '';
-            document.getElementById('tsubject').value = '';
-            document.getElementById('tcontent').value = '';
-            document.getElementById('templateEditor').style.display = 'block';
-            document.getElementById('noTemplate').style.display = 'none';
-        }
-
-        function editTemplate(id) {
-            const t = templates.find(x => x.id === id);
+    // Template list click delegation
+    document.getElementById('templatesList').addEventListener('click', e => {
+        const previewBtn = e.target.closest('[data-preview-tpl]');
+        if (previewBtn) {
+            const t = templates.find(x => x.id === parseInt(previewBtn.dataset.previewTpl));
             if (t) {
-                editId = id;
+                document.getElementById('previewContent').innerHTML = t.html;
+                document.getElementById('previewModal').classList.add('active');
+            }
+            return;
+        }
+        const delBtn = e.target.closest('[data-del-tpl]');
+        if (delBtn) {
+            if (confirm('Delete this template?')) {
+                templates = templates.filter(t => t.id !== parseInt(delBtn.dataset.delTpl));
+                renderTemplates();
+            }
+            return;
+        }
+        const item = e.target.closest('.tpl-item');
+        if (item) {
+            const t = templates.find(x => x.id === parseInt(item.dataset.tplId));
+            if (t) {
+                editTplId = t.id;
                 document.getElementById('tname').value = t.name;
                 document.getElementById('tsubject').value = t.subject;
                 document.getElementById('tcontent').value = t.html;
@@ -763,150 +982,91 @@
                 document.getElementById('noTemplate').style.display = 'none';
             }
         }
+    });
 
-        function cancelTemplate() {
-            document.getElementById('templateEditor').style.display = 'none';
-            document.getElementById('noTemplate').style.display = 'block';
+    // Campaign type selection
+    document.querySelectorAll('.template-option[data-tpl]').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.template-option[data-tpl]').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            selectedCampaignType = opt.dataset.tpl;
+            document.getElementById('realEstateFields').style.display = selectedCampaignType === 'realestate' ? 'block' : 'none';
+            document.getElementById('prayerFields').style.display = selectedCampaignType === 'prayer' ? 'block' : 'none';
+        });
+    });
+
+    // Send campaign
+    document.getElementById('campaignForm').addEventListener('submit', e => {
+        e.preventDefault();
+        if (!selectedCampaignType) { showMsg('campaignMsg', '⚠ Select a template type first', 'warning'); return; }
+        const tplId = document.getElementById('campaignTemplateSelect').value;
+        if (!tplId) { showMsg('campaignMsg', '⚠ Select a template in Step 3', 'warning'); return; }
+        const vars = {
+            zoomLink: document.getElementById('czoom').value,
+            meetingDate: document.getElementById('cdate').value,
+            meetingTime: document.getElementById('ctime').value,
+            propertyAddress: document.getElementById('propAddress')?.value || '',
+            propertyType: document.getElementById('propType')?.value || '',
+            propertyPrice: document.getElementById('propPrice')?.value || '',
+            prayerSection: document.getElementById('prayerSection')?.value || ''
+        };
+        const result = simulateSend(tplId, vars);
+        if (result.error && !result.success) {
+            showMsg('campaignMsg', '✗ ' + result.error, 'error');
+        } else {
+            showMsg('campaignMsg', '✓ Campaign sent! ' + result.sent + ' delivered, ' + result.failed + ' failed', 'success');
+            document.getElementById('campaignStatus').textContent = '✓ Last campaign sent successfully!';
+            document.getElementById('campaignDetails').textContent = 'Delivered: ' + result.sent + ' | Failed: ' + result.failed + ' | ' + new Date().toLocaleString();
+            document.getElementById('campaignForm').reset();
+            document.querySelectorAll('.template-option[data-tpl]').forEach(o => o.classList.remove('selected'));
+            document.getElementById('realEstateFields').style.display = 'none';
+            document.getElementById('prayerFields').style.display = 'none';
+            selectedCampaignType = '';
         }
+    });
 
-        async function saveTemplate(e) {
-            e.preventDefault();
-            const r = await fetch(`${API}/templates`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: editId,
-                    name: document.getElementById('tname').value,
-                    subject: document.getElementById('tsubject').value,
-                    html: document.getElementById('tcontent').value
-                })
-            }).then(r => r.json());
-            if (r.success) {
-                showMsg('templateMsg', '✓ Template saved!', 'success');
-                cancelTemplate();
-                loadTemplates();
-            } else {
-                showMsg('templateMsg', '✗ Error saving template', 'error');
-            }
-        }
+    // Logs
+    document.getElementById('refreshLogsBtn').addEventListener('click', renderLogs);
+    document.getElementById('clearLogsBtn').addEventListener('click', () => {
+        if (confirm('Clear all logs?')) { campaignLogs = []; renderLogs(); }
+    });
 
-        // ============================================================
-        // CAMPAIGNS
-        // ============================================================
-        async function sendCampaign(e) {
-            e.preventDefault();
-            const tid = document.getElementById('selectedTemplate').value;
-            if (!tid) { showMsg('campaignMsg', '⚠ Select template first', 'warning'); return; }
-            document.getElementById('campaignLoading').style.display = 'block';
-            const r = await fetch(`${API}/campaigns/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    templateId: parseInt(tid),
-                    zoomLink: document.getElementById('czoom').value,
-                    meetingDate: document.getElementById('cdate').value,
-                    meetingTime: document.getElementById('ctime').value,
-                    prayerSection: document.getElementById('prayerSection').value
-                })
-            }).then(r => r.json());
-            document.getElementById('campaignLoading').style.display = 'none';
-            if (r.success) {
-                showMsg('campaignMsg', `✓ Sent: ${r.sent} success, ${r.failed} failed!`, 'success');
-                document.getElementById('campaignForm').reset();
-                document.getElementById('campaignStatus').textContent = '✓ Campaign sent!';
-                document.getElementById('campaignDetails').textContent = `Delivered: ${r.sent} | Failed: ${r.failed}`;
-                loadLogs();
-            } else showMsg('campaignMsg', '✗ ' + r.error, 'error');
-        }
+    // SMTP
+    document.getElementById('smtpForm').addEventListener('submit', e => {
+        e.preventDefault();
+        smtpSettings = {
+            host: document.getElementById('shost').value,
+            port: parseInt(document.getElementById('sport').value),
+            encryption: document.getElementById('ssecure').value,
+            user: document.getElementById('suser').value,
+            pass: document.getElementById('spass').value,
+            senderName: document.getElementById('ssendername').value,
+            companyName: document.getElementById('scompany').value,
+            companyPhone: document.getElementById('sphone').value
+        };
+        showMsg('smtpMsg', '✓ SMTP settings saved!', 'success');
+        document.getElementById('smtpStatusWrap').innerHTML = '<div class="smtp-status smtp-on"><div class="smtp-dot"></div>Configured: ' + smtpSettings.host + ':' + smtpSettings.port + '</div>';
+    });
 
-        // ============================================================
-        // LOGS
-        // ============================================================
-        async function loadLogs() {
-            logs = await fetch(`${API}/campaigns/logs`).then(r => r.json()).catch(() => []);
-            const html = logs.length ? logs.map(l => `<div style="padding:10px;border-left:4px solid ${l.status === 'success' ? '#28a745' : '#dc3545'};background:${l.status === 'success' ? '#ecfdf5' : '#fef2f2'};margin-bottom:8px;border-radius:4px;font-size:13px"><strong>${l.leadName}</strong> (${l.leadEmail})<br><small>${l.message} - ${new Date(l.timestamp).toLocaleString()}</small></div>`).join('') : '<div style="text-align:center;color:#999;padding:40px">No logs</div>';
-            document.getElementById('logsList').innerHTML = html;
-        }
+    document.getElementById('sendTestBtn').addEventListener('click', () => {
+        const email = document.getElementById('testEmail').value;
+        if (!email) { showMsg('testResult', '⚠ Enter an email address', 'warning'); return; }
+        if (!smtpSettings.host) { showMsg('testResult', '✗ Save SMTP settings first', 'error'); return; }
+        showMsg('testResult', '✓ Test email simulated to ' + email + ' via ' + smtpSettings.host, 'success');
+    });
 
-        function clearLogs() {
-            if (confirm('Clear all logs?')) {
-                logs = [];
-                document.getElementById('logsList').innerHTML = '<div style="text-align:center;color:#999;padding:40px">Cleared</div>';
-            }
-        }
+    // Modal
+    document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('previewModal').classList.remove('active'));
+    document.getElementById('previewModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('previewModal')) document.getElementById('previewModal').classList.remove('active');
+    });
 
-        // ============================================================
-        // SMTP
-        // ============================================================
-        async function loadSmtp() {
-            const s = await fetch(`${API}/smtp-settings`).then(r => r.json()).catch(() => ({}));
-            document.getElementById('shost').value = s.host || '';
-            document.getElementById('sport').value = s.port || 587;
-            document.getElementById('ssecure').value = s.encryption || 'true';
-            document.getElementById('suser').value = s.user || '';
-            document.getElementById('spass').value = s.pass || '';
-            document.getElementById('ssendername').value = s.senderName || '';
-            document.getElementById('scompany').value = s.companyName || '';
-            document.getElementById('sphone').value = s.companyPhone || '';
-        }
-
-        async function saveSmtp(e) {
-            e.preventDefault();
-            
-            if (!document.getElementById('shost').value) {
-                showMsg('smtpMsg', '⚠ SMTP Host is required', 'warning');
-                return;
-            }
-            
-            let port = document.getElementById('sport').value;
-            if (port === 'custom') {
-                port = document.getElementById('customPort').value;
-                if (!port) {
-                    showMsg('smtpMsg', '⚠ Enter custom port number', 'warning');
-                    return;
-                }
-            }
-            
-            const r = await fetch(`${API}/smtp-settings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    host: document.getElementById('shost').value,
-                    port: parseInt(port),
-                    encryption: document.getElementById('ssecure').value,
-                    user: document.getElementById('suser').value || '',
-                    pass: document.getElementById('spass').value || '',
-                    senderName: document.getElementById('ssendername').value || '',
-                    companyName: document.getElementById('scompany').value || '',
-                    companyPhone: document.getElementById('sphone').value || ''
-                })
-            }).then(r => r.json());
-            if (r.success) showMsg('smtpMsg', '✓ Saved!', 'success');
-            else showMsg('smtpMsg', '✗ Error', 'error');
-        }
-
-        async function testSmtp() {
-            const r = await fetch(`${API}/smtp-test`, { method: 'POST' }).then(r => r.json());
-            showMsg('testResult', r.success ? '✓ ' + r.message : '✗ ' + r.error, r.success ? 'success' : 'error');
-        }
-
-        async function sendTestEmail() {
-            const email = document.getElementById('testEmail').value;
-            if (!email) { showMsg('smtpMsg', '⚠ Enter email', 'warning'); return; }
-            const r = await fetch(`${API}/smtp-test-email`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            }).then(r => r.json());
-            showMsg('testResult', r.success ? '✓ ' + r.message : '✗ ' + r.error, r.success ? 'success' : 'error');
-        }
-
-        function closeModal() {
-            document.getElementById('previewModal').classList.remove('active');
-        }
-
-        loadDash();
-        loadSmtp();
-    </script>
+    // Init
+    refreshDash();
+    renderTemplates();
+    renderLeads();
+    renderLogs();
+});
+</script>
 </body>
 </html>
